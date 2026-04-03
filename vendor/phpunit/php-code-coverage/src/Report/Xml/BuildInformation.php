@@ -13,21 +13,22 @@ use function assert;
 use function phpversion;
 use DateTimeImmutable;
 use DOMElement;
+use SebastianBergmann\CodeCoverage\CodeCoverage;
 use SebastianBergmann\Environment\Runtime;
 
 /**
  * @internal This class is not covered by the backward compatibility promise for phpunit/php-code-coverage
  */
-final readonly class BuildInformation
+final class BuildInformation
 {
-    private DOMElement $contextNode;
+    private readonly DOMElement $contextNode;
 
     public function __construct(DOMElement $contextNode)
     {
         $this->contextNode = $contextNode;
     }
 
-    public function setRuntimeInformation(Runtime $runtime): void
+    public function setRuntimeInformation(Runtime $runtime, CodeCoverage $coverage): void
     {
         $runtimeNode = $this->nodeByName('runtime');
 
@@ -37,14 +38,12 @@ final readonly class BuildInformation
 
         $driverNode = $this->nodeByName('driver');
 
-        if ($runtime->hasXdebug()) {
-            $driverNode->setAttribute('name', 'xdebug');
-            $driverNode->setAttribute('version', phpversion('xdebug'));
-        }
-
-        if ($runtime->hasPCOV()) {
+        if ($coverage->driverIsPcov()) {
             $driverNode->setAttribute('name', 'pcov');
             $driverNode->setAttribute('version', phpversion('pcov'));
+        } elseif ($coverage->driverIsXdebug()) {
+            $driverNode->setAttribute('name', 'xdebug');
+            $driverNode->setAttribute('version', phpversion('xdebug'));
         }
     }
 
@@ -66,7 +65,7 @@ final readonly class BuildInformation
             $name,
         )->item(0);
 
-        if ($node === null) {
+        if (!$node) {
             $node = $this->contextNode->appendChild(
                 $this->contextNode->ownerDocument->createElementNS(
                     'https://schema.phpunit.de/coverage/1.0',

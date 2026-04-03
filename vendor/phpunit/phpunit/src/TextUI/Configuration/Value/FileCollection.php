@@ -18,7 +18,7 @@ use IteratorAggregate;
  *
  * @immutable
  *
- * @template-implements IteratorAggregate<int, File>
+ * @template-implements IteratorAggregate<non-negative-int, File>
  */
 final readonly class FileCollection implements Countable, IteratorAggregate
 {
@@ -55,7 +55,7 @@ final readonly class FileCollection implements Countable, IteratorAggregate
 
     public function notEmpty(): bool
     {
-        return $this->files !== [];
+        return !empty($this->files);
     }
 
     public function getIterator(): FileCollectionIterator

@@ -10,41 +10,31 @@
 namespace SebastianBergmann\CodeCoverage\Report\Xml;
 
 use const DIRECTORY_SEPARATOR;
-use const PHP_EOL;
 use function count;
 use function dirname;
 use function file_get_contents;
-use function file_put_contents;
 use function is_array;
 use function is_dir;
 use function is_file;
 use function is_writable;
-use function libxml_clear_errors;
-use function libxml_get_errors;
-use function libxml_use_internal_errors;
 use function sprintf;
 use function strlen;
 use function substr;
 use DateTimeImmutable;
 use DOMDocument;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
+use SebastianBergmann\CodeCoverage\Driver\PathExistsButIsNotDirectoryException;
+use SebastianBergmann\CodeCoverage\Driver\WriteOperationFailedException;
 use SebastianBergmann\CodeCoverage\Node\AbstractNode;
 use SebastianBergmann\CodeCoverage\Node\Directory as DirectoryNode;
-use SebastianBergmann\CodeCoverage\Node\File;
 use SebastianBergmann\CodeCoverage\Node\File as FileNode;
-use SebastianBergmann\CodeCoverage\PathExistsButIsNotDirectoryException;
+use SebastianBergmann\CodeCoverage\Util\Filesystem;
 use SebastianBergmann\CodeCoverage\Util\Filesystem as DirectoryUtil;
+use SebastianBergmann\CodeCoverage\Util\Xml;
 use SebastianBergmann\CodeCoverage\Version;
-use SebastianBergmann\CodeCoverage\WriteOperationFailedException;
 use SebastianBergmann\CodeCoverage\XmlException;
 use SebastianBergmann\Environment\Runtime;
 
-/**
- * @phpstan-import-type ProcessedClassType from File
- * @phpstan-import-type ProcessedTraitType from File
- * @phpstan-import-type ProcessedFunctionType from File
- * @phpstan-import-type TestType from CodeCoverage
- */
 final class Facade
 {
     private string $target;
@@ -74,17 +64,17 @@ final class Facade
             $coverage->getReport()->name(),
         );
 
-        $this->setBuildInformation();
+        $this->setBuildInformation($coverage);
         $this->processTests($coverage->getTests());
         $this->processDirectory($report, $this->project);
 
         $this->saveDocument($this->project->asDom(), 'index');
     }
 
-    private function setBuildInformation(): void
+    private function setBuildInformation(CodeCoverage $coverage): void
     {
         $buildNode = $this->project->buildInformation();
-        $buildNode->setRuntimeInformation(new Runtime);
+        $buildNode->setRuntimeInformation(new Runtime, $coverage);
         $buildNode->setBuildTime(new DateTimeImmutable);
         $buildNode->setGeneratorVersions($this->phpUnitVersion, Version::id());
     }
@@ -96,7 +86,6 @@ final class Facade
     private function initTargetDirectory(string $directory): void
     {
         if (is_file($directory)) {
-            // @codeCoverageIgnoreStart
             if (!is_dir($directory)) {
                 throw new PathExistsButIsNotDirectoryException($directory);
             }
@@ -104,7 +93,6 @@ final class Facade
             if (!is_writable($directory)) {
                 throw new WriteOperationFailedException($directory);
             }
-            // @codeCoverageIgnoreEnd
         }
 
         DirectoryUtil::createDirectory($directory);
@@ -184,9 +172,6 @@ final class Facade
         $this->saveDocument($fileReport->asDom(), $file->id());
     }
 
-    /**
-     * @param ProcessedClassType|ProcessedTraitType $unit
-     */
     private function processUnit(array $unit, Report $report): void
     {
         if (isset($unit['className'])) {
@@ -217,9 +202,6 @@ final class Facade
         }
     }
 
-    /**
-     * @param ProcessedFunctionType $function
-     */
     private function processFunction(array $function, Report $report): void
     {
         $functionObject = $report->functionObject($function['functionName']);
@@ -230,9 +212,6 @@ final class Facade
         $functionObject->setTotals((string) $function['executableLines'], (string) $function['executedLines'], (string) $function['coverage']);
     }
 
-    /**
-     * @param array<string, TestType> $tests
-     */
     private function processTests(array $tests): void
     {
         $testsObject = $this->project->tests();
@@ -247,9 +226,9 @@ final class Facade
         $loc = $node->linesOfCode();
 
         $totals->setNumLines(
-            $loc->linesOfCode(),
-            $loc->commentLinesOfCode(),
-            $loc->nonCommentLinesOfCode(),
+            $loc['linesOfCode'],
+            $loc['commentLinesOfCode'],
+            $loc['nonCommentLinesOfCode'],
             $node->numberOfExecutableLines(),
             $node->numberOfExecutedLines(),
         );
@@ -287,38 +266,8 @@ final class Facade
     {
         $filename = sprintf('%s/%s.xml', $this->targetDirectory(), $name);
 
-        $document->formatOutput       = true;
-        $document->preserveWhiteSpace = false;
         $this->initTargetDirectory(dirname($filename));
 
-        file_put_contents($filename, $this->documentAsString($document));
-    }
-
-    /**
-     * @throws XmlException
-     *
-     * @see https://bugs.php.net/bug.php?id=79191
-     */
-    private function documentAsString(DOMDocument $document): string
-    {
-        $xmlErrorHandling = libxml_use_internal_errors(true);
-        $xml              = $document->saveXML();
-
-        if ($xml === false) {
-            // @codeCoverageIgnoreStart
-            $message = 'Unable to generate the XML';
-
-            foreach (libxml_get_errors() as $error) {
-                $message .= PHP_EOL . $error->message;
-            }
-
-            throw new XmlException($message);
-            // @codeCoverageIgnoreEnd
-        }
-
-        libxml_clear_errors();
-        libxml_use_internal_errors($xmlErrorHandling);
-
-        return $xml;
+        Filesystem::write($filename, Xml::asString($document));
     }
 }

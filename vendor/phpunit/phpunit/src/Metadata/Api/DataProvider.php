@@ -9,21 +9,34 @@
  */
 namespace PHPUnit\Metadata\Api;
 
+use const JSON_ERROR_NONE;
+use const PREG_OFFSET_CAPTURE;
 use function array_key_exists;
 use function assert;
-use function count;
+use function explode;
 use function get_debug_type;
 use function is_array;
 use function is_int;
 use function is_string;
+use function json_decode;
+use function json_last_error;
+use function json_last_error_msg;
+use function preg_match;
+use function preg_replace;
+use function rtrim;
 use function sprintf;
+use function str_replace;
+use function strlen;
+use function substr;
+use function trim;
 use PHPUnit\Event;
-use PHPUnit\Event\Code\TestMethod;
 use PHPUnit\Framework\InvalidDataProviderException;
 use PHPUnit\Metadata\DataProvider as DataProviderMetadata;
 use PHPUnit\Metadata\MetadataCollection;
 use PHPUnit\Metadata\Parser\Registry as MetadataRegistry;
 use PHPUnit\Metadata\TestWith;
+use PHPUnit\Util\Test;
+use ReflectionClass;
 use ReflectionMethod;
 use Throwable;
 
@@ -44,11 +57,12 @@ final readonly class DataProvider
      */
     public function providedData(string $className, string $methodName): ?array
     {
-        $dataProvider = MetadataRegistry::parser()->forMethod($className, $methodName)->isDataProvider();
-        $testWith     = MetadataRegistry::parser()->forMethod($className, $methodName)->isTestWith();
+        $metadataCollection = MetadataRegistry::parser()->forMethod($className, $methodName);
+        $dataProvider       = $metadataCollection->isDataProvider();
+        $testWith           = $metadataCollection->isTestWith();
 
         if ($dataProvider->isEmpty() && $testWith->isEmpty()) {
-            return null;
+            return $this->dataProvidedByTestWithAnnotation($className, $methodName);
         }
 
         if ($dataProvider->isNotEmpty()) {
@@ -63,40 +77,13 @@ final readonly class DataProvider
             );
         }
 
-        $method                       = new ReflectionMethod($className, $methodName);
-        $testMethodNumberOfParameters = $method->getNumberOfParameters();
-        $testMethodIsNonVariadic      = !$method->isVariadic();
-
         foreach ($data as $key => $value) {
             if (!is_array($value)) {
                 throw new InvalidDataProviderException(
                     sprintf(
                         'Data set %s is invalid, expected array but got %s',
-                        $this->formatKey($key),
+                        is_int($key) ? '#' . $key : '"' . $key . '"',
                         get_debug_type($value),
-                    ),
-                );
-            }
-
-            if ($testMethodIsNonVariadic && $testMethodNumberOfParameters < count($value)) {
-                Event\Facade::emitter()->testTriggeredPhpunitWarning(
-                    new TestMethod(
-                        $className,
-                        $methodName,
-                        $method->getFileName(),
-                        $method->getStartLine(),
-                        Event\Code\TestDoxBuilder::fromClassNameAndMethodName(
-                            $className,
-                            $methodName,
-                        ),
-                        MetadataCollection::fromArray([]),
-                        Event\TestData\TestDataCollection::fromArray([]),
-                    ),
-                    sprintf(
-                        'Data set %s has more arguments (%d) than the test method accepts (%d)',
-                        $this->formatKey($key),
-                        count($value),
-                        $testMethodNumberOfParameters,
                     ),
                 );
             }
@@ -132,7 +119,20 @@ final readonly class DataProvider
             $methodsCalled[] = $dataProviderMethod;
 
             try {
-                $method = new ReflectionMethod($_dataProvider->className(), $_dataProvider->methodName());
+                $class  = new ReflectionClass($_dataProvider->className());
+                $method = $class->getMethod($_dataProvider->methodName());
+
+                if (Test::isTestMethod($method)) {
+                    Event\Facade::emitter()->testRunnerTriggeredPhpunitWarning(
+                        sprintf(
+                            'Method %s::%s() used by test method %s::%s() is also a test method',
+                            $_dataProvider->className(),
+                            $_dataProvider->methodName(),
+                            $className,
+                            $methodName,
+                        ),
+                    );
+                }
 
                 if (!$method->isPublic()) {
                     throw new InvalidDataProviderException(
@@ -166,9 +166,31 @@ final readonly class DataProvider
 
                 $className  = $_dataProvider->className();
                 $methodName = $_dataProvider->methodName();
+                $data       = $className::$methodName();
 
-                /** @phpstan-ignore staticMethod.dynamicName */
-                $data = $className::$methodName();
+                foreach ($data as $key => $value) {
+                    if (is_int($key)) {
+                        $result[] = $value;
+                    } elseif (is_string($key)) {
+                        if (array_key_exists($key, $result)) {
+                            throw new InvalidDataProviderException(
+                                sprintf(
+                                    'The key "%s" has already been defined by a previous data provider',
+                                    $key,
+                                ),
+                            );
+                        }
+
+                        $result[$key] = $value;
+                    } else {
+                        throw new InvalidDataProviderException(
+                            sprintf(
+                                'The key must be an integer or a string, %s given',
+                                get_debug_type($key),
+                            ),
+                        );
+                    }
+                }
             } catch (Throwable $e) {
                 Event\Facade::emitter()->dataProviderMethodFinished(
                     $testMethod,
@@ -180,37 +202,6 @@ final readonly class DataProvider
                     $e->getCode(),
                     $e,
                 );
-            }
-
-            foreach ($data as $key => $value) {
-                if (is_int($key)) {
-                    $result[] = $value;
-                } elseif (is_string($key)) {
-                    if (array_key_exists($key, $result)) {
-                        Event\Facade::emitter()->dataProviderMethodFinished(
-                            $testMethod,
-                            ...$methodsCalled,
-                        );
-
-                        throw new InvalidDataProviderException(
-                            sprintf(
-                                'The key "%s" has already been defined by a previous data provider',
-                                $key,
-                            ),
-                        );
-                    }
-
-                    $result[$key] = $value;
-                } else {
-                    // @codeCoverageIgnoreStart
-                    throw new InvalidDataProviderException(
-                        sprintf(
-                            'The key must be an integer or a string, %s given',
-                            get_debug_type($key),
-                        ),
-                    );
-                    // @codeCoverageIgnoreEnd
-                }
             }
         }
 
@@ -254,12 +245,57 @@ final readonly class DataProvider
     }
 
     /**
-     * @param int|non-empty-string $key
+     * @param class-string $className
      *
-     * @return non-empty-string
+     * @throws InvalidDataProviderException
+     *
+     * @return ?array<array<mixed>>
      */
-    private function formatKey(int|string $key): string
+    private function dataProvidedByTestWithAnnotation(string $className, string $methodName): ?array
     {
-        return is_int($key) ? '#' . $key : '"' . $key . '"';
+        $docComment = (new ReflectionMethod($className, $methodName))->getDocComment();
+
+        if ($docComment === false) {
+            return null;
+        }
+
+        $docComment = str_replace("\r\n", "\n", $docComment);
+        $docComment = preg_replace('/\n\s*\*\s?/', "\n", $docComment);
+        $docComment = substr($docComment, 0, -1);
+        $docComment = rtrim($docComment, "\n");
+
+        if (!preg_match('/@testWith\s+/', $docComment, $matches, PREG_OFFSET_CAPTURE)) {
+            return null;
+        }
+
+        $offset            = strlen($matches[0][0]) + (int) $matches[0][1];
+        $annotationContent = substr($docComment, $offset);
+        $data              = [];
+
+        foreach (explode("\n", $annotationContent) as $candidateRow) {
+            $candidateRow = trim($candidateRow);
+
+            if ($candidateRow === '' || $candidateRow[0] !== '[') {
+                break;
+            }
+
+            $dataSet = json_decode($candidateRow, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new InvalidDataProviderException(
+                    'The data set for the @testWith annotation cannot be parsed: ' . json_last_error_msg(),
+                );
+            }
+
+            $data[] = $dataSet;
+        }
+
+        if (!$data) {
+            throw new InvalidDataProviderException(
+                'The data set for the @testWith annotation cannot be parsed.',
+            );
+        }
+
+        return $data;
     }
 }

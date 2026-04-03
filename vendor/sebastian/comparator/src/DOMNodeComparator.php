@@ -61,7 +61,7 @@ final class DOMNodeComparator extends ObjectComparator
             try {
                 $c14n = $node->C14N();
 
-                assert($c14n !== false && $c14n !== '');
+                assert(!empty($c14n));
 
                 @$document->loadXML($c14n);
             } catch (ValueError) {

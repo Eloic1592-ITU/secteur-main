@@ -13,6 +13,7 @@ namespace Symfony\Component\AssetMapper\ImportMap\Resolver;
 
 use Symfony\Component\AssetMapper\Compiler\CssAssetUrlCompiler;
 use Symfony\Component\AssetMapper\Exception\RuntimeException;
+use Symfony\Component\AssetMapper\ImportMap\BatchHttpClient;
 use Symfony\Component\AssetMapper\ImportMap\ImportMapEntry;
 use Symfony\Component\AssetMapper\ImportMap\ImportMapType;
 use Symfony\Component\AssetMapper\ImportMap\PackageRequireOptions;
@@ -32,12 +33,12 @@ final class JsDelivrEsmResolver implements PackageResolverInterface
 
     private const ES_MODULE_SHIMS = 'es-module-shims';
 
-    private HttpClientInterface $httpClient;
+    private readonly HttpClientInterface $httpClient;
 
     public function __construct(
         ?HttpClientInterface $httpClient = null,
     ) {
-        $this->httpClient = $httpClient ?? HttpClient::create();
+        $this->httpClient = new BatchHttpClient($httpClient ?? HttpClient::create());
     }
 
     public function resolvePackages(array $packagesToRequire): array
@@ -184,6 +185,7 @@ final class JsDelivrEsmResolver implements PackageResolverInterface
         $errors = [];
         $contents = [];
         $extraFileResponses = [];
+        /** @var ImportMapEntry $entry */
         foreach ($responses as $package => [$response, $entry]) {
             if (200 !== $response->getStatusCode()) {
                 $errors[] = [$package, $response];
@@ -196,7 +198,6 @@ final class JsDelivrEsmResolver implements PackageResolverInterface
 
             $dependencies = [];
             $extraFiles = [];
-            /** @var ImportMapEntry $entry */
             $contents[$package] = [
                 'content' => $this->makeImportsBare($response->getContent(), $dependencies, $extraFiles, $entry->type, $entry->getPackagePathString()),
                 'dependencies' => $dependencies,
@@ -318,7 +319,7 @@ final class JsDelivrEsmResolver implements PackageResolverInterface
         }
 
         preg_match_all(CssAssetUrlCompiler::ASSET_URL_PATTERN, $content, $matches);
-        foreach ($matches[1] as $path) {
+        foreach ($matches[2] as $path) {
             if (str_starts_with($path, 'data:')) {
                 continue;
             }

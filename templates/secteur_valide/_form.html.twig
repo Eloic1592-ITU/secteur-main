@@ -1,0 +1,44 @@
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/form.css') }}">
+{% endblock %}
+
+{% block body %}
+
+<div class="custom-container">
+    <div class="custom-card">
+        <div class="custom-card-body">
+            <h4>{{ button_title|default("Ajouter l'evolution d'indice secteur") }}</h4>
+            {{ form_start(form, {'attr': {'class': 'custom-form'}}) }}
+            <div class="form-grid">
+                {% for field in form %}
+                    {% if field.vars.name != '_token' %}
+                        <div class="form-group">
+                                    {# ✅ Affiche les erreurs globales ici #}
+                            {% if form.vars.errors|length > 0 %}
+                                <div class="form-global-errors">
+                                    {{ form_errors(form) }}
+                                </div>
+                            {% endif %}
+                            
+                            {{ form_label(field, null, {'label_attr': {'class': 'custom-label'}}) }}
+                            {{ form_widget(field, {'attr': {'class': 'custom-input'}}) }}
+                            {{ form_errors(field) }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">
+                    {{ button_label|default('Ajouter') }}
+                </button>
+                <a href="{{ path('app_secteur_valide_index') }}" class="btn-secondary">
+                    Annuler
+                </a>
+            </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

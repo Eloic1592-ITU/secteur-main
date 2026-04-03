@@ -1,0 +1,110 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}MvtBonsValide{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/view.css') }}">
+{% endblock %}
+
+{% block body %}
+
+    <div class="info-box">
+        <div class="row">
+            <span class="label">NUMMVT</span>
+            <span class="value">{{ mvt_bons_valide.NUMMVT }}</span>
+        </div>
+        <div class="row">
+            <span class="label">D_BONS</span>
+            <span class="value">{{ mvt_bons_valide.DBONS }}</span>
+        </div>
+        <div class="row">
+            <span class="label">NUMSEM</span>
+            <span class="value">{{ mvt_bons_valide.NUMSEM }}</span>
+        </div>
+        <div class="row">
+            <span class="label">NBRSS</span>
+            <span class="value">{{ mvt_bons_valide.NBRSS }}</span>
+        </div>
+        <div class="row">
+            <span class="label">NBRSS0</span>
+            <span class="value">{{ mvt_bons_valide.NBRSS0 }}</span>
+        </div>
+        <div class="row">
+            <span class="label">NBRSS1</span>
+            <span class="value">{{ mvt_bons_valide.NBRSS1 }}</span>
+        </div>
+        <div class="row">
+            <span class="label">NBRSS2</span>
+            <span class="value">{{ mvt_bons_valide.NBRSS2 }}</span>
+        </div>
+        <div class="row">
+            <span class="label">MAN</span>
+            <span class="value">{{ mvt_bons_valide.MAN }}</span>
+        </div>
+        <div class="row">
+            <span class="label">MAN1</span>
+            <span class="value">{{ mvt_bons_valide.MAN1 }}</span>
+        </div>
+        <div class="row">
+            <span class="label">MAN2</span>
+            <span class="value">{{ mvt_bons_valide.MAN2 }}</span>
+        </div>
+        <div class="row">
+            <span class="label">MSM</span>
+            <span class="value">{{ mvt_bons_valide.MSM }}</span>
+        </div>
+        <div class="row">
+            <span class="label">MSM1</span>
+            <span class="value">{{ mvt_bons_valide.MSM1 }}</span>
+        </div>
+        <div class="row">
+            <span class="label">MSM2</span>
+            <span class="value">{{ mvt_bons_valide.MSM2 }}</span>
+        </div>
+        <div class="row">
+            <span class="label">MAD</span>
+            <span class="value">{{ mvt_bons_valide.MAD }}</span>
+        </div>
+        <div class="row">
+            <span class="label">MAD1</span>
+            <span class="value">{{ mvt_bons_valide.MAD1 }}</span>
+        </div>
+        <div class="row">
+            <span class="label">MAD2</span>
+            <span class="value">{{ mvt_bons_valide.MAD2 }}</span>
+        </div>
+        <div class="row">
+            <span class="label">TXPMIN</span>
+            <span class="value">{{ mvt_bons_valide.TXPMIN }}</span>
+        </div>
+        <div class="row">
+            <span class="label">TXPMAX</span>
+            <span class="value">{{ mvt_bons_valide.TXPMAX }}</span>
+        </div>
+        <div class="row">
+            <span class="label">TXAMIN</span>
+            <span class="value">{{ mvt_bons_valide.TXAMIN }}</span>
+        </div>
+        <div class="row">
+            <span class="label">TXAMAX</span>
+            <span class="value">{{ mvt_bons_valide.TXAMAX }}</span>
+        </div>
+        <div class="row">
+            <span class="label">TXMP</span>
+            <span class="value">{{ mvt_bons_valide.TXMP }}</span>
+        </div>
+    </div>
+
+    <div class="actions">
+        <a href="{{ path('app_mvt_bons_valide_index') }}">
+            <i class="bi bi-arrow-return-left"></i> Retour à la liste
+        </a>
+        <a href="{{ path('app_mvt_bons_valide_edit', {'id': mvt_bons_valide.NUMMVT}) }}">
+            <i class="bi bi-pencil-square"></i> Modifier
+        </a>
+        <a href="{{ path('app_mvt_bons_valide_delete', {'id': mvt_bons_valide.NUMMVT}) }}" data-confirm="Êtes-vous sûr de vouloir supprimer cet élément ?">
+            <i class="bi bi-trash"></i> Supprimer
+        </a>
+    </div>
+
+{% endblock %}

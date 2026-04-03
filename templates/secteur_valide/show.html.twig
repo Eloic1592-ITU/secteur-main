@@ -1,0 +1,110 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}SecteurValide{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/view.css') }}">
+{% endblock %}
+
+{% set mois = {
+    1: 'Janvier',
+    2: 'Février',
+    3: 'Mars',
+    4: 'Avril',
+    5: 'Mai',
+    6: 'Juin',
+    7: 'Juillet',
+    8: 'Août',
+    9: 'Septembre',
+    10: 'Octobre',
+    11: 'Novembre',
+    12: 'Décembre'
+} %}
+
+
+{% block body %}
+    <h2  class="info-titre">Information d'indice de {{ mois[secteur_valide.nummois] }}-{{ secteur_valide.annee }} pour secteur </h2>
+
+    <div class="info-box">
+        <div class="row">
+            <span class="label">Année</span>
+            <span class="value">{{ secteur_valide.annee }}</span>
+        </div>
+        <div class="row">
+            <span class="label">Nummois</span>
+            <span class="value">{{ secteur_valide.nummois }}</span>
+        </div>
+        <div class="row">
+            <span class="label">Ensemble</span>
+            <span class="value">{{ secteur_valide.ensemble }}</span>
+        </div>
+        <div class="row">
+            <span class="label">Prodvivr_n_t</span>
+            <span class="value">{{ secteur_valide.prodvivrNT }}</span>
+        </div>
+        <div class="row">
+            <span class="label">Prodvivr_t_n_riz</span>
+            <span class="value">{{ secteur_valide.prodvivrTNRiz }}</span>
+        </div>
+        <div class="row">
+            <span class="label">Prodvivr_t_riz</span>
+            <span class="value">{{ secteur_valide.prodvivrTRiz }}</span>
+        </div>
+        <div class="row">
+            <span class="label">Prodmanufind</span>
+            <span class="value">{{ secteur_valide.prodmanufind }}</span>
+        </div>
+        <div class="row">
+            <span class="label">Prodmanufart</span>
+            <span class="value">{{ secteur_valide.prodmanufart }}</span>
+        </div>
+        <div class="row">
+            <span class="label">Servpubl</span>
+            <span class="value">{{ secteur_valide.servpubl }}</span>
+        </div>
+        <div class="row">
+            <span class="label">Servpriv</span>
+            <span class="value">{{ secteur_valide.servpriv }}</span>
+        </div>
+        <div class="row">
+            <span class="label">Ppn</span>
+            <span class="value">{{ secteur_valide.ppn }}</span>
+        </div>
+
+    </div>
+    <div class="actions">
+        <a href="{{ path('app_secteur_valide_index') }}"> <i class="bi bi-arrow-return-left"></i>  Retour à la liste</a>
+        <a href="{{ path('app_secteur_valide_edit', {'id': secteur_valide.id}) }}"> <i class="bi bi-pencil-square"></i> Modifier</a>
+    </div>
+
+
+</br>
+<div class="historique">
+   <fieldset>
+       <legend>Date de creation</legend>
+       <ul>
+                Matricule : {{ app.user.matricule }} </br>
+              Créé le :
+                {{ secteur_valide.createdAt ? secteur_valide.createdAt|date('d/m/Y H:i') : 'N/A' }}
+                par {{ secteur_valide.createdBy ?? 'Inconnu' }}
+
+   </fieldset>
+
+   <fieldset>
+       <legend>Historique des modifications</legend>
+       <ul>
+           {% for historique in secteur_valide.historiques %}
+               <li>
+                   Modifié le : {{ historique.dateModification|date('d/m/Y H:i') }}
+                   {% if historique.modifiePar %}
+                       par {{ historique.modifiePar }}
+                   {% endif %}
+               </li>
+           {% else %}
+               <li>Aucune modification enregistrée</li>
+           {% endfor %}
+       </ul>
+   </fieldset>
+</div>
+
+{% endblock %}

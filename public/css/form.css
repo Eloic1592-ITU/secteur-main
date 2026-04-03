@@ -1,0 +1,111 @@
+/* Container */
+        .custom-container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 0px;
+    margin: auto !important;
+    font-size: 14px;
+    padding-top: 70px;
+    display: block !important;
+}
+
+/* Card style */
+.custom-card {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+.custom-card-body {
+    padding: 30px;
+}
+/* Form grid */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+/* Form group */
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.custom-label {
+    margin-bottom: 6px;
+    color: #333;
+    
+}
+
+.custom-input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    height: 40px;
+}
+
+/* Form buttons */
+.form-actions {
+    margin-top: 30px;
+    display: flex;
+    gap: 15px;
+    justify-content: flex-start;
+}
+
+.btn-primary {
+    background-color: #2e4ead;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: #2e4ead;
+    border: 2px solid #2e4ead;
+    padding: 10px 20px;
+    border-radius: 4px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.btn-primary:hover,
+.btn-secondary:hover {
+    opacity: 0.9;
+}
+
+/* Erreurs globales déjà gérées */
+.form-global-errors {
+    background-color: #f8d7da;
+    color: red; /* forcé en rouge */
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    border: 1px solid #f5c6cb;
+}
+
+/* Erreurs au niveau d'un champ */
+.form-group ul {
+    margin: 5px 0 0;
+    padding-left: 15px;
+    list-style: none;
+}
+
+.form-group ul li {
+    color: red; /* texte rouge */
+    font-size: 13px;
+}
+
+.custom-card-body h4 {
+    font-size: 1.2rem;         /* taille plus grande */
+    font-weight: 600;          /* gras */
+    color: #5479b1;            /* couleur bleu */
+    margin-bottom: 20px;       /* espacement dessous */
+    text-align: center;        /* centré */
+
+    letter-spacing: 1.5px;     /* espacement entre lettres */
+}

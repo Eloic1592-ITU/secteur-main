@@ -1,0 +1,125 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}FonctionValide{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/view.css') }}">
+{% endblock %}
+
+{% set mois = {
+    1: 'Janvier',
+    2: 'Février',
+    3: 'Mars',
+    4: 'Avril',
+    5: 'Mai',
+    6: 'Juin',
+    7: 'Juillet',
+    8: 'Août',
+    9: 'Septembre',
+    10: 'Octobre',
+    11: 'Novembre',
+    12: 'Décembre'
+} %}
+
+{% block body %}
+    <h2  class="info-titre">Information d'indice de {{ mois[fonction_valide.nummois] }}-{{ fonction_valide.annee }} pour fonction </h2>
+
+<div class="info-box">
+    <div class="row">
+        <span class="label">Année</span>
+        <span class="value">{{ fonction_valide.annee }}</span>
+    </div>
+    <div class="row">
+        <span class="label">Nummois</span>
+        <span class="value">{{ fonction_valide.nummois }}</span>
+    </div>
+    <div class="row">
+        <span class="label">Ensemble</span>
+        <span class="value">{{ fonction_valide.ensemble }}</span>
+    </div>
+    <div class="row">
+        <span class="label">Prod alim bois nalc</span>
+        <span class="value">{{ fonction_valide.prodAlimBoisNalc }}</span>
+    </div>
+    <div class="row">
+        <span class="label">Tissu vêtement</span>
+        <span class="value">{{ fonction_valide.tissuVetement }}</span>
+    </div>
+    <div class="row">
+        <span class="label">Logt et combust</span>
+        <span class="value">{{ fonction_valide.logtEtCombust }}</span>
+    </div>
+    <div class="row">
+        <span class="label">Am eqmena entc m</span>
+        <span class="value">{{ fonction_valide.amEqmenaEntcM }}</span>
+    </div>
+    <div class="row">
+        <span class="label">Santé</span>
+        <span class="value">{{ fonction_valide.sante }}</span>
+    </div>
+    <div class="row">
+        <span class="label">Transports</span>
+        <span class="value">{{ fonction_valide.transports }}</span>
+    </div>
+    <div class="row">
+        <span class="label">Loisir spect. cult.</span>
+        <span class="value">{{ fonction_valide.loisirSpectCult }}</span>
+    </div>
+    <div class="row">
+        <span class="label">Enseignement</span>
+        <span class="value">{{ fonction_valide.enseignement }}</span>
+    </div>
+    <div class="row">
+        <span class="label">Hotel café rest.</span>
+        <span class="value">{{ fonction_valide.hotelCafeRest }}</span>
+    </div>
+    <div class="row">
+        <span class="label">Autres bien serv.</span>
+        <span class="value">{{ fonction_valide.autresBienServ }}</span>
+    </div>
+    <div class="row">
+        <span class="label">Bois alc tab</span>
+        <span class="value">{{ fonction_valide.boisAlcTab }}</span>
+    </div>
+    <div class="row">
+        <span class="label">Communications</span>
+        <span class="value">{{ fonction_valide.communications }}</span>
+    </div>
+    
+</div>
+    <div class="actions">
+        <a href="{{ path('app_fonction_valide_index') }}"> <i class="bi bi-arrow-return-left"></i>  Retour a la liste</a>
+    <a href="{{ path('app_fonction_valide_edit', {'id': fonction_valide.id}) }}"> <i class="bi bi-pencil-square"></i> Modifier</a>
+    </div>
+
+</br>
+
+<div class="historique">
+<fieldset>
+    <legend>Date de création</legend>
+    <ul>
+            Créé le :
+            {{ fonction_valide.createdAt ? fonction_valide.createdAt|date('d/m/Y H:i') : 'N/A' }}
+            par {{ fonction_valide.createdBy ?? 'N/A' }}
+    </ul>
+</fieldset>
+
+   <fieldset>
+       <legend>Historique des modifications</legend>
+       <ul>
+           {% for historique in fonction_valide.historiques %}
+               <li>
+                   Modifié le : {{ historique.dateModification|date('d/m/Y H:i') }}
+                   {% if historique.modifiePar %}
+                       par {{ historique.modifiePar }}
+                   {% endif %}
+               </li>
+           {% else %}
+               <li>Aucune modification enregistrée</li>
+           {% endfor %}
+       </ul>
+   </fieldset>
+</div>
+  
+   
+{% endblock %}

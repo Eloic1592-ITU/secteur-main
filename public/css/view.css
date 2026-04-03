@@ -1,0 +1,89 @@
+.info-titre{
+    text-align: center;
+    font-size: 20px;
+    color: #2e4ead;
+    padding-top: 50px;
+    margin-bottom: 20px;
+}
+
+.info-box {
+    width: 70%;
+    margin: auto;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    font-family: sans-serif;
+    display: grid;
+    grid-template-columns: auto auto auto ;
+    gap: 10px 50px;
+    margin-left: 17%;
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #e1e1e1;
+}
+
+.label {
+   font-size: 14px;
+    color: #333;
+    width: 60%;
+}
+
+.value {
+    color: #555;
+    width: 20%;
+    text-align: right;
+    font-size: 14px;
+}
+
+.row:last-child {
+    border-bottom: none;
+}
+
+.historique{
+    width: 70%;
+    
+    margin: auto;
+    padding: 20px;
+    background: #f2f2f3;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    font-family: sans-serif;
+    font-size: 14px;
+    margin-left: 17%;
+}
+
+fieldset {
+    padding: 0 20px 20px 0; /* Suppression du padding gauche */
+    margin-bottom: 10px;
+    border: 1px solid #c3ccfd;
+    border-radius: 5px;
+    position: relative;
+}
+
+legend {
+    color: #747171;
+    font-weight: bold;
+    font-size: 16px;
+    padding: 0 10px; /* Optionnel pour un peu d'air autour du texte */
+}
+
+.actions {
+    display: flex;
+    justify-content: space-between;
+    margin-left: 17%;
+    width: 70%;
+    margin-top: 10px;
+}
+.actions a {
+    text-decoration: none;
+    color: #2e4ead;
+    padding: 07px 15px;
+    border: 1px solid #2e4ead;
+    border-radius: 5px;
+}
+

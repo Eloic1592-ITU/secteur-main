@@ -1,0 +1,89 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}OrigineValide{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/view.css') }}">
+{% endblock %}
+
+{% set mois = {
+    1: 'Janvier',
+    2: 'Février',
+    3: 'Mars',
+    4: 'Avril',
+    5: 'Mai',
+    6: 'Juin',
+    7: 'Juillet',
+    8: 'Août',
+    9: 'Septembre',
+    10: 'Octobre',
+    11: 'Novembre',
+    12: 'Décembre'
+} %}
+
+{% block body %}
+
+    <h2  class="info-titre">Information d'indice de {{ mois[origine_valide.nummois] }}-{{ origine_valide.annee }} pour origine </h2>
+
+    <div class="info-box">
+        <div class="row">
+            <span class="label">Année</span>
+            <span class="value">{{ origine_valide.annee }}</span>
+        </div>
+        <div class="row">
+            <span class="label">Nummois</span>
+            <span class="value">{{ origine_valide.nummois }}</span>
+        </div>
+        <div class="row">
+            <span class="label">Ensemble</span>
+            <span class="value">{{ origine_valide.ensemble }}</span>
+        </div>
+        <div class="row">
+            <span class="label">Prodlocal</span>
+            <span class="value">{{ origine_valide.prodlocal }}</span>
+        </div>
+        <div class="row">
+            <span class="label">Prodsemimp</span>
+            <span class="value">{{ origine_valide.prodsemimp }}</span>
+        </div>
+        <div class="row">
+            <span class="label">Prodimport</span>
+            <span class="value">{{ origine_valide.prodimport }}</span>
+        </div>
+
+    </div>
+    <div class="actions">
+        <a href="{{ path('app_origine_valide_index') }}"> <i class="bi bi-arrow-return-left"></i> Retour a la liste</a>
+        <a href="{{ path('app_origine_valide_edit', {'id': origine_valide.id}) }}"><i class="bi bi-pencil-square"></i> Modifier</a>
+    </div>
+</br>
+
+<div class="historique">
+   <fieldset>
+       <legend>Date de creation</legend>
+       <ul>
+            Créé le :
+            {{ origine_valide.createdAt ? origine_valide.createdAt|date('d/m/Y H:i') : 'N/A' }}
+            par {{ origine_valide.createdBy ?? 'Inconnu' }}
+
+       </ul>
+   </fieldset>
+
+   <fieldset>
+       <legend>Historique des modifications</legend>
+       <ul>
+           {% for historique in origine_valide.historiques %}
+               <li>
+                   Modifié le : {{ historique.dateModification|date('d/m/Y H:i') }}
+                   {% if historique.modifiePar %}
+                       par {{ historique.modifiePar }}
+                   {% endif %}
+               </li>
+           {% else %}
+               <li>Aucune modification enregistrée</li>
+           {% endfor %}
+       </ul>
+   </fieldset>
+</div>
+
+{% endblock %}

@@ -1,0 +1,19 @@
+controllers:
+    resource:
+        path: ../src/Controller/
+        namespace: App\Controller
+    type: attribute
+    
+
+
+fonction:
+  path: /fonction
+  controller: App\Controller\FonctionController::index
+
+fonctionvalide:
+  path: /fonction/valide
+  controller: App\Controller\FonctionValideController::index
+
+origine:
+  path: /origine
+  controller: App\Controller\OrigineController::index

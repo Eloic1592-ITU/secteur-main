@@ -1,0 +1,167 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}SecteurValide index{% endblock %}
+
+{% block stylesheets %}
+     <link rel="stylesheet" href="{{ asset('css/tableau.css') }}">
+     <style>
+     #refreshTable {
+    transition: transform 0.3s ease;
+    }
+    #refreshTable:active {
+        transform: rotate(180deg);
+    }
+    .btn-add {
+    display: flex;
+    flex: nowrap;
+    gap: 5px;
+}
+     </style>
+{% endblock %}
+
+{% block body %}
+    <div class="entete">
+       <div class="row my-4 px-3 align-items-center justify-content-between">
+            <div class="col-md-3">
+                <label for="columnSelect" class="form-label mb-1">Choisir une colonne :</label>
+                <select id="columnSelect" class="form-select">
+                    <option value="">-- Sélectionner --</option>
+                    <option value="0">Annee</option>
+                    <option value="1">Nummois</option>
+                    <option value="2">Ensemble</option>
+                    <option value="3">Prodvivr_n_t</option>
+                    <option value="4">Prodvivr_t_n_riz</option>
+                    <option value="5">Prodvivr_t_riz</option>
+                    <option value="6">Prodmanufind</option>
+                    <option value="7">Prodmanufart</option>
+                    <option value="8">Servpubl</option>
+                    <option value="9">Servpriv</option>
+                    <option value="10">Ppn</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-none" id="searchColumnWrapper">
+                <label for="searchInput" class="form-label mb-1">Rechercher :</label>
+                <input type="text" id="searchInput" class="form-control" placeholder="Entrez une valeur...">
+            </div>
+            <div class="col-md-2 text-end d-flex justify-content-end gap-2">
+                <a class="btn btn-outline-secondary" id="refreshTable" title="Rafraîchir">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </a>
+                <a class="add btn btn-primary btn-add" href="{{ path('app_secteur_valide_new') }}">
+                    <i class="bi bi-plus-circle"></i> Ajouter
+                </a>
+            </div>
+        </div>
+
+    <div class="outer-wrapper">
+    <div class="table-wrapper">
+    <table class="table table-hover" id="sortableTable">
+        <thead class="table-secondary">
+            <tr>
+                <th class="sortable">ANNEE</th>
+                <th class="sortable">NUMMOIS</th>
+                <th class="sortable">ENSEMBLE</th>
+                <th class="sortable">PRODVIVR_N_T</th>
+                <th class="sortable">PRODVIVR_T_N_RIZ</th>
+                <th class="sortable">PRODVIVR_T_RIZ</th>
+                <th class="sortable">PRODMANUFIND</th>
+                <th class="sortable">PRODMANUFART</th>
+                <th class="sortable">SERVPUBL</th>
+                <th class="sortable">SERVPRIV</th>
+                <th class="sortable">PPN</th>
+                <th>ACTIONS</th>
+            </tr>
+
+            </tr>
+        </thead>
+        <tbody>
+        {% for secteur_valide in secteur_valides |sort((a, b) => b.createdAt <=> a.createdAt)  %}
+            
+            {% set dernier_historique = secteur_valide.historiques|last %}
+            <tr 
+                data-matricule="{{ app.user.matricule }}"
+                data-created="{{ secteur_valide.createdAt ? secteur_valide.createdAt|date('d/m/Y H:i') : 'N/A' }}"
+                data-createdby="{{ secteur_valide.createdBy ?? 'N/A' }}"
+                data-updated="{{ secteur_valide.updatedAt ? secteur_valide.updatedAt|date('d/m/Y H:i' ) : 'N/A' }}"
+                data-updatedby="{{ dernier_historique.modifiePar ?? 'N/A' }}">
+
+                <td class="modal-trigger">{{ secteur_valide.annee }}</td>
+                <td class="modal-trigger">{{ secteur_valide.nummois }}</td>
+                <td class="modal-trigger">{{ secteur_valide.ensemble }}</td>
+                <td class="modal-trigger">{{ secteur_valide.prodvivrNT }}</td>
+                <td class="modal-trigger">{{ secteur_valide.prodvivrTNRiz }}</td>
+                <td class="modal-trigger">{{ secteur_valide.prodvivrTRiz }}</td>
+                <td class="modal-trigger">{{ secteur_valide.prodmanufind }}</td>
+                <td class="modal-trigger">{{ secteur_valide.prodmanufart }}</td>
+                <td class="modal-trigger">{{ secteur_valide.servpubl }}</td>
+                <td class="modal-trigger">{{ secteur_valide.servpriv }}</td>
+                <td class="modal-trigger">{{ secteur_valide.ppn }}</td>
+                <td>
+                    <a href="{{ path('app_secteur_valide_show', {'id': secteur_valide.id}) }}"
+                    class="btn btn-sm btn-outline-success"
+                    title="Voir">
+                        <i class="bi bi-eye-fill"></i>
+                    </a>
+                    <a href="{{ path('app_secteur_valide_edit', {'id': secteur_valide.id}) }}"
+                    class="btn btn-sm btn-outline-primary"
+                    title="Modifier">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+
+                    <form method="post"
+                        action="{{ path('app_secteur_valide_delete', {'id': secteur_valide.id}) }}"
+                        class="form-delete"
+                        data-id="{{ secteur_valide.id }}"
+                        style="display:inline;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ secteur_valide.id) }}">
+                        {#<button type="submit" class="btn btn-sm btn-danger"> <i class="bi bi-trash"></i></button>#}
+                    </form>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="13">Liste vide</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    
+    </div>
+    </div>
+  
+<!-- Modal personnalisé -->
+<div id="customModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="close-button" id="closeModal">&times;</span>
+            <h5>Détails de l'enregistrement</h5>       
+        </div>
+
+        <div id="modalDetails">
+            <!-- Contenu injecté dynamiquement -->
+        </div>
+    </div>
+</div>
+
+    </div>
+    
+   
+
+    <div id="pagination-wrapper"></div>
+
+    <script src="{{ asset('js/secteur_valide.js') }}"></script>
+    {% block javascripts %}
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const refreshBtn = document.getElementById("refreshTable");
+
+        refreshBtn.addEventListener("click", function () {
+            refreshBtn.classList.add("spin"); // Pour animation si tu veux
+            location.reload();
+        });
+    });
+    </script>
+    {% endblock %}
+
+
+{% endblock %}

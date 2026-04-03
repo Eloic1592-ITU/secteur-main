@@ -1,0 +1,329 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}FonctionValide index{% endblock %}
+
+
+
+{% block body %}
+    <div class="entete">
+
+<style>
+    .entete{ 
+    padding: 20px;
+    margin-left: 15%; 
+    padding-bottom: 0;
+}
+.add{
+    background-color: #2c5eaa;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 14px;
+    text-decoration: none;
+    height: 40px;
+    margin-left: 13px;
+}
+.heading {
+    display: flex;
+    background-color: #232f3e;
+    box-shadow: 0px 1px 2px #232f3e;
+
+}
+h1 {
+    color: coral;
+    font-weight: bold; 
+    background: transparent;
+    padding: 7px;
+    
+}
+.outer-wrapper {
+    margin-bottom: 50px;
+    margin-left: 17%;
+    margin-right: 10px;
+    border-radius: 4px;
+    box-shadow: 0px 0px 3px #9e9d9d;
+    width: 80vw !important;
+    justify-content: center;  /* Centrage horizontal */
+    align-items: center;      /* Centrage vertical */
+    
+}
+.table-wrapper {
+    overflow-y: scroll;
+    overflow-x: scroll;
+    height: fit-content;
+    margin: 15px;
+    padding-bottom: 20px;    
+}
+
+table {   
+    min-width: max-content;    
+    border-collapse: separate;
+    border-spacing: 0px;  
+    font-size: 13px;
+    text-align: center;
+}
+
+
+table th{
+    position: sticky; 
+    top: 0px;  
+    background-color: #cbced1;
+    color: rgb(12, 12, 11);  
+    text-align: center;
+    font-weight: normal;
+} 
+table th, table td {   
+    padding: 15px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    
+}
+table td {
+    text-align: center; 
+    padding-left: 20px;
+    
+}
+
+
+/* Appliquer une bordure de 5px au tooltip Bootstrap */
+.tooltip .tooltip-inner {
+    border: 5px solid #2e4ead; /* couleur au choix */
+    background-color: #fff;
+    color: #333;
+    font-size: 14px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    width: 300px;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 0px ;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    position: relative;
+    left:30%;
+    animation: animatetop 0.3s;
+    top: 25%;
+}
+
+.close-button {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-size: 20px;
+    cursor: pointer;
+
+}
+.btn-add {
+    display: flex;
+    flex: nowrap;
+    gap: 5px;
+}
+#modalDetails {
+    margin-top: 20px;
+    margin-left: 10px
+}
+/* Add Animation */
+@-webkit-keyframes animatetop {
+  from {top:-300px; opacity:0} 
+  to {top:0; opacity:1}
+}
+
+@keyframes animatetop {
+  from {top:-300px; opacity:0}
+  to {top:0; opacity:1}
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.modal-header {
+ text-align: center;
+    padding: 10px;
+    background-color: #f1f1f1;
+    border-bottom: 1px solid #ddd;
+  background-color: #5cb85c;
+  color: white;
+}
+
+#refreshTable {
+    transition: transform 0.3s ease;
+}
+#refreshTable:active {
+    transform: rotate(180deg);
+}
+
+@media (max-width: 850px) {
+    .entete {
+        margin-left: 0;
+        margin-top: 20px;
+    }
+}
+    </style>
+    
+        <div class="row my-4 px-3 align-items-center justify-content-between">
+            <div class="col-md-3">
+                <label for="columnSelect" class="form-label mb-1">Choisir une colonne :</label>
+                <select id="columnSelect" class="form-select">
+                    <option value="">-- Sélectionner --</option>
+                    <option value="0">Annee</option>
+                    <option value="1">Nummois</option>
+                    <option value="2">Ensemble</option>
+                    <option value="3">Prod_alim_bois_nalc</option>
+                    <option value="4">Tissu_vetement</option>
+                    <option value="5">Logt_et_combust</option>
+                    <option value="6">Am_eqmena_entc_m</option>
+                    <option value="7">Sante</option>
+                    <option value="8">Transports</option>
+                    <option value="9">Loisir_spect_cult</option>
+                    <option value="10">Enseignement</option>
+                    <option value="11">Hotel_cafe_rest</option>
+                    <option value="12">Autres_bien_serv</option>
+                    <option value="13">Bois_alc_tab</option>
+                    <option value="14">Communications</option>
+                </select>
+            </div>
+
+            <div class="col-md-3 d-none" id="searchColumnWrapper">
+                <label for="searchInput" class="form-label mb-1">Rechercher :</label>
+                <input type="text" id="searchInput" class="form-control" placeholder="Entrez une valeur...">
+            </div>
+
+            <div class="col-md-2 text-end d-flex justify-content-end gap-2">
+                <a class="btn btn-outline-secondary" id="refreshTable" title="Rafraîchir">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </a>
+                <a class="add btn btn-primary btn-add" href="{{ path('app_fonction_valide_new') }}">
+                    <i class="bi bi-plus-circle"></i> Ajouter
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="outer-wrapper">
+        <div class="table-wrapper">
+            <table class="table  table-hover" id="sortableTable">
+                <thead class="table-secondary">
+                    <tr>
+                        <th>ANNEE</th>
+                        <th>NUMMOIS</th>
+                        <th>ENSEMBLE</th>
+                        <th>PROD_ALIM_BOIS_NALC</th>
+                        <th>TISSU_VETEMENT</th>
+                        <th>LOGT_ET_COMBUST</th>
+                        <th>AM_EQMENA_ENTC_M</th>
+                        <th>SANTE</th>
+                        <th>TRANSPORTS</th>
+                        <th>LOISIR_SPECT_CULT</th>
+                        <th>ENSEIGNEMENT</th>
+                        <th>HOTEL_CAFE_REST</th>
+                        <th>AUTRES_BIEN_SERV</th>
+                        <th>BOIS_ALC_TAB</th>
+                        <th>COMMUNICATIONS</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fonction_valide in fonction_valides |sort((a, b) => b.createdAt <=> a.createdAt)  %}
+                        {% set dernier_historique = fonction_valide.historiques|last %}
+                        <tr 
+                            data-matricule="{{ app.user.matricule }}"
+                            data-created="{{ fonction_valide.createdAt ? fonction_valide.createdAt|date('d/m/Y H:i') : 'N/A' }}"
+                            data-createdby="{{ fonction_valide.createdBy ?? 'N/A' }}"
+                            data-updated="{{ fonction_valide.updatedAt ? fonction_valide.updatedAt|date('d/m/Y H:i') : 'N/A' }}"
+                            data-updatedby="{{ dernier_historique.modifiePar ?? 'N/A' }}"
+                        >
+                            <td class="modal-trigger">{{ fonction_valide.annee }}</td>
+                            <td class="modal-trigger">{{ fonction_valide.nummois }}</td>
+                            <td class="modal-trigger">{{ fonction_valide.ensemble }}</td>
+                            <td class="modal-trigger">{{ fonction_valide.prodAlimBoisNalc }}</td>
+                            <td class="modal-trigger">{{ fonction_valide.tissuVetement }}</td>
+                            <td class="modal-trigger">{{ fonction_valide.logtEtCombust }}</td>
+                            <td class="modal-trigger">{{ fonction_valide.amEqmenaEntcM }}</td>
+                            <td class="modal-trigger">{{ fonction_valide.sante }}</td>
+                            <td class="modal-trigger">{{ fonction_valide.transports }}</td>
+                            <td class="modal-trigger">{{ fonction_valide.loisirSpectCult }}</td>
+                            <td class="modal-trigger">{{ fonction_valide.enseignement }}</td>
+                            <td class="modal-trigger">{{ fonction_valide.hotelCafeRest }}</td>
+                            <td class="modal-trigger">{{ fonction_valide.autresBienServ }}</td>
+                            <td class="modal-trigger">{{ fonction_valide.boisAlcTab }}</td>
+                            <td class="modal-trigger">{{ fonction_valide.communications }}</td>
+                            <td>
+                                <a href="{{ path('app_fonction_valide_show', {'id': fonction_valide.id}) }}"
+                                    class="btn btn-sm btn-outline-success" title="Voir">
+                                    <i class="bi bi-eye-fill"></i>
+                                </a>
+                                <a href="{{ path('app_fonction_valide_edit', {'id': fonction_valide.id}) }}"
+                                    class="btn btn-sm btn-outline-primary" title="Modifier">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form method="post"
+                                    action="{{ path('app_fonction_valide_delete', {'id': fonction_valide.id}) }}"
+                                    class="form-delete"
+                                    data-id="{{ fonction_valide.id }}"
+                                    style="display:inline;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ fonction_valide.id) }}">
+                                    {#<button type="submit" class="btn btn-sm btn-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>#}
+                                </form>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="16">Liste vide</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal personnalisé -->
+    <div id="customModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close-button" id="closeModal">&times;</span>
+                <h5>Détails de l'enregistrement</h5>       
+            </div>
+            <div id="modalDetails">
+                <!-- Contenu injecté dynamiquement -->
+            </div>
+        </div>
+    </div>
+
+    <div id="pagination-wrapper"></div>
+    <script src="{{ asset('js/fonctions_valide.js') }}"></script>
+        {% block javascripts %}
+        <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const refreshBtn = document.getElementById("refreshTable");
+
+            refreshBtn.addEventListener("click", function () {
+                refreshBtn.classList.add("spin"); // Pour animation si tu veux
+                location.reload();
+            });
+        });
+        </script>
+        {% endblock %}
+{% endblock %}

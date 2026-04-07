@@ -38,16 +38,16 @@ final class MvtBonsValideController extends AbstractController
             // Fonction pour formater les valeurs numériques
             $num = fn(?string $v) => $v !== null ? number_format((float)$v, 2, '.', '') : 'NULL';
             $int = fn(?int $v)    => $v !== null ? (int)$v : 'NULL';
-            $str = fn(?string $v) => $v !== null ? "'" . str_replace("'", "''", $v) . "'" : 'NULL';// Échappement standard Oracle
+            $str = fn(?string $v) => $v !== null ? "'" . str_replace("'", "''", $v) . "'" : 'NULL';
 
             $sql = sprintf(
                 "INSERT INTO MVT_BONS_VALIDE 
-                    (D_BONS, NUMSEM, NBRSS, NBRSS0, NBRSS1, NBRSS2,
+                    (NUMMVT, D_BONS, NUMSEM, NBRSS, NBRSS0, NBRSS1, NBRSS2,
                      MAN, MAN1, MAN2, MSM, MSM1, MSM2,
                      MAD, MAD1, MAD2, TXPMIN, TXPMAX,
                      TXAMIN, TXAMAX, TXMP)
                  VALUES 
-                    (%s, %s, %s, %s, %s, %s,
+                    (seq_MVT_BONS_VALIDE.NEXTVAL, %s, %s, %s, %s, %s, %s,
                      %s, %s, %s, %s, %s, %s,
                      %s, %s, %s, %s, %s,
                      %s, %s, %s)",
@@ -74,6 +74,9 @@ final class MvtBonsValideController extends AbstractController
             );
 
             $conn->executeStatement($sql);
+
+            $this->addFlash('success', 'L\'enregistrement a été créé avec succès.');
+
             return $this->redirectToRoute('app_mvt_bons_valide_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -82,7 +85,6 @@ final class MvtBonsValideController extends AbstractController
             'form' => $form,
         ]);
     }
-
     #[Route('/{id}', name: 'app_mvt_bons_valide_show', methods: ['GET'])]
     public function show(MvtBonsValide $mvtBonsValide): Response
     {
@@ -162,9 +164,9 @@ public function edit(Request $request, MvtBonsValide $mvtBonsValide, EntityManag
     $conn->executeStatement(
         sprintf(
             "INSERT INTO MVT_BONS_VALIDE_HISTORIQUE 
-                (MVT_BONS_VALIDE_ID, DATE_MODIFICATION, MODIFIE_PAR)
+                (ID,MVT_BONS_VALIDE_ID, DATE_MODIFICATION, MODIFIE_PAR)
              VALUES 
-                (%d, TO_TIMESTAMP('%s', 'YYYY-MM-DD HH24:MI:SS'), '%s')",
+                (seq_MVT_BONS_VALIDE_HISTORIQUE.NEXTVAL,%d, TO_TIMESTAMP('%s', 'YYYY-MM-DD HH24:MI:SS'), '%s')",
             $mvtBonsValide->getNUMMVT(),
             $now->format('Y-m-d H:i:s'),
             str_replace("'", "''", $currentUser->getMatricule())

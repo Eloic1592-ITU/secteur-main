@@ -11,7 +11,8 @@ class MvtBonsValide
 {
     #[ORM\Id]
     #[ORM\Column(name: "NUMMVT", type: "integer")]
-    #[ORM\GeneratedValue(strategy: "IDENTITY")]
+    #[ORM\GeneratedValue(strategy: "SEQUENCE")]
+    #[ORM\SequenceGenerator(sequenceName: 'seq_MVT_BONS_VALIDE')]
     private ?int $NUMMVT = null;
 
     #[ORM\Column(name: "D_BONS", type: "string", length: 10, nullable: false)]

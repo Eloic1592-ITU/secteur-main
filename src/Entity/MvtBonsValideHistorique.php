@@ -11,7 +11,9 @@ class MvtBonsValideHistorique
 {
     #[ORM\Id]
     #[ORM\Column(name: "ID", type: "integer")]
-    #[ORM\GeneratedValue(strategy: "IDENTITY")]
+    #[ORM\GeneratedValue(strategy: "SEQUENCE")]
+    #[ORM\SequenceGenerator(sequenceName: 'seq_MVT_BONS_VALIDE_HISTORIQUE')]
+
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: MvtBonsValide::class)]

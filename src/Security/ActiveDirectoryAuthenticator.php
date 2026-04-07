@@ -144,7 +144,7 @@ class ActiveDirectoryAuthenticator extends AbstractAuthenticator
         $user = $token->getUser();
         $userRoles = $user->getRoles();
 
-        // ✅ Charger les menus depuis USER_AUTORIZED et les mettre en session
+        // Charger les menus depuis USER_AUTORIZED et les mettre en session
         $userAutorized = $this->entityManager
             ->getRepository(\App\Entity\UserAutorized::class)
             ->findOneBy(['matricule' => $user->getMatricule()]);

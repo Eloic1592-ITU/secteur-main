@@ -17,10 +17,7 @@ class ActiveDirectoryService
         }
 
         public function authenticate(string $username, string $password): bool
-        {  
-            // ❌ SERVICE LDAP DÉSACTIVÉ - Utilisation du login standard Symfony
-            // Ancienne connexion LDAP commentée ci-dessous :
-            /*
+        {              
             $ldapConn = ldap_connect($this->host, $this->port);
             if (!$ldapConn) {
                 throw new \Exception('Impossible de se connecter au serveur LDAP');
@@ -39,9 +36,16 @@ class ActiveDirectoryService
 
             ldap_unbind($ldapConn);
             return false;
-            */
-            return false; // Ne sera pas utilisé avec Symfony standard
         }
+
+            /**
+            * Récupère les attributs de l'utilisateur depuis Active Directory
+            * 
+            * @param string $username Matricule de l'utilisateur
+            * @param string $password Mot de passe (pour l'authentification LDAP)
+            * @return array Tableau avec les attributs de l'utilisateur
+            */
+
 
         /*
         public function getUserInfo(string $username, string $password): string
@@ -241,7 +245,13 @@ class ActiveDirectoryService
 
             $result = [
                 'givenName' => null,
-            ];
+                // 'sn' => null,              // Nom de famille
+                // 'displayName' => null,     // Nom complet
+                // 'mail' => null,            // Email
+                // 'telephoneNumber' => null, // Téléphone
+                // 'department' => null,      // Département
+                // 'title' => null,           // Titre/Poste
+                ];
 
             try {
                 // Authentification, peux ajouter des attribut si besoin
@@ -256,6 +266,7 @@ class ActiveDirectoryService
                     'DC=bcm,DC=int',
                     "(sAMAccountName=$username)",
                     ['givenName']
+                    // ['givenName', 'sn', 'displayName', 'mail', 'telephoneNumber', 'department', 'title']
                 );
                 
                 if (!$search) {
@@ -272,7 +283,6 @@ class ActiveDirectoryService
                 if (isset($entries[0]['givenname'][0])) {
                     $result['givenName'] = (string)$entries[0]['givenname'][0];
                 }
-                
                 return $result;
                 
             } finally {

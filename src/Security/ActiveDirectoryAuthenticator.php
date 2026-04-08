@@ -42,17 +42,12 @@ class ActiveDirectoryAuthenticator extends AbstractAuthenticator
 
     public function supports(Request $request): ?bool
     {
-        dump([
-            '_route' => $request->attributes->get('_route'),
-            'method' => $request->getMethod()
-        ]);
         return $request->attributes->get('_route') === 'app_login' && $request->isMethod('POST');
     }
 
     public function authenticate(Request $request): Passport
     {
-        $usrMatricule = $request->request->get('matricule');
-        $user_matricule = $usrMatricule;
+        $user_matricule = $request->request->get('matricule');
         $user_password = $request->request->get('password');
         
         // Vérifier si non vide
@@ -83,6 +78,9 @@ class ActiveDirectoryAuthenticator extends AbstractAuthenticator
         );
     }
 
+    /**
+     * Gère la création/mise à jour de l'utilisateur dans la base Oracle
+     */
     private function ensureUserExists($user_matricule, $user_password): User
     {
         // Vérifier dans la table user_autorized
@@ -90,6 +88,10 @@ class ActiveDirectoryAuthenticator extends AbstractAuthenticator
         $userAutorized = $userAutorizedRepo->findOneBy(['matricule' => $user_matricule]);
 
         if (!$userAutorized) {
+            // Récupérer les infos LDAP pour avoir le nom
+            // $ldapAttributes = $this->adService->getUserAttributes($user_matricule, $user_password);
+            // $displayName = $ldapAttributes['displayName'] ?? $ldapAttributes['givenName'] ?? $user_matricule;
+
             // N'existe pas encore → on l'ajoute avec isAutorized = 0
             $userAutorized = new \App\Entity\UserAutorized();
             $userAutorized->setMatricule($user_matricule);
@@ -129,6 +131,7 @@ class ActiveDirectoryAuthenticator extends AbstractAuthenticator
         $user = new User();
         $user->setMatricule($matricule);
         $user->setPassword($this->passwordHasher->hashPassword($user, $password));
+        // $user->setPassword('');
         $user->setRoles(["ROLE_USER"]);
         $user->setNom($ldapAttributes['givenName'] ?? $matricule);
         
@@ -148,8 +151,6 @@ class ActiveDirectoryAuthenticator extends AbstractAuthenticator
         $userAutorized = $this->entityManager
             ->getRepository(\App\Entity\UserAutorized::class)
             ->findOneBy(['matricule' => $user->getMatricule()]);
-
-        
 
         if ($userAutorized) {
             $request->getSession()->set('user_menus', $userAutorized->getMenu());
@@ -175,6 +176,7 @@ class ActiveDirectoryAuthenticator extends AbstractAuthenticator
         } else {
             $errorMessage = 'Erreur d\'authentification.';
         }
+        
         $url = $this->router->generate('app_login', ['message' => $errorMessage]);
         return new RedirectResponse($url);
     }

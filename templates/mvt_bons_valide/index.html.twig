@@ -63,10 +63,10 @@
     <table class="table table-hover" id="sortableTable">
         <thead class="table-secondary">
             <tr>
-                <th class="sortable">Num Mouvement</th>
-                <th class="sortable">Date Bons</th>
-                <th class="sortable">Num Semaine</th>
-                <th class="sortable">Nombre de semaines</th>
+                {#<th class="sortable">Num Mouvement</th>#}
+                <th class="sortable">Date Bons (D_BONS)</th>
+                <th class="sortable">Num Semaine (NUMSEM)</th>
+                {# <th class="sortable">Nombre de semaines</th> 
                 <th class="sortable">Nombre de semaines 0</th>
                 <th class="sortable">Nombre de semaines 1</th>
                 <th class="sortable">Nombre de semaines 2</th>
@@ -82,8 +82,8 @@
                 <th class="sortable">Taux proposés minimum</th>
                 <th class="sortable">Taux proposés maximum</th>
                 <th class="sortable">Taux minimum</th>
-                <th class="sortable">Taux maximum</th>
-                <th class="sortable">Taux moyen pondéré</th>
+                <th class="sortable">Taux maximum</th> #}
+                <th class="sortable">Taux moyen pondéré (TXMP)</th>
                 <th>ACTIONS</th>
             </tr>
         </thead>
@@ -91,10 +91,10 @@
         <tbody>
         {% for mvt in mvt_bons_valides %}
             <tr>
-                <td class="modal-trigger">{{ mvt.NUMMVT }}</td>
+                {#<td class="modal-trigger">{{ mvt.NUMMVT }}</td>#}
                 <td class="modal-trigger">{{ mvt.DBONS }}</td>
                 <td class="modal-trigger">{{ mvt.NUMSEM }}</td>
-                <td class="modal-trigger">{{ mvt.NBRSS }}</td>
+                {#<td class="modal-trigger">{{ mvt.NBRSS }}</td>
                 <td class="modal-trigger">{{ mvt.NBRSS0 }}</td>
                 <td class="modal-trigger">{{ mvt.NBRSS1 }}</td>
                 <td class="modal-trigger">{{ mvt.NBRSS2 }}</td>
@@ -110,7 +110,7 @@
                 <td class="modal-trigger">{{ mvt.TXPMIN }}</td>
                 <td class="modal-trigger">{{ mvt.TXPMAX }}</td>
                 <td class="modal-trigger">{{ mvt.TXAMIN }}</td>
-                <td class="modal-trigger">{{ mvt.TXAMAX }}</td>
+                <td class="modal-trigger">{{ mvt.TXAMAX }}</td> #}
                 <td class="modal-trigger">{{ mvt.TXMP }}</td>
 
                 <td>

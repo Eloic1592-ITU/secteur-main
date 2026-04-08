@@ -24,19 +24,17 @@
 
                 {% for field in form %}
                     {% if field.vars.name != '_token' %}
-                        <div class="form-group">
-
-                            {{ form_label(field, null, {'label_attr': {'class': 'custom-label'}}) }}
-
-                            {{ form_widget(field, {
-                                'attr': {
-                                    'class': 'custom-input'
-                                }
-                            }) }}
-
-                            {{ form_errors(field) }}
-
-                        </div>
+                        {% if field.vars.block_prefixes[1] == 'hidden' %}
+                            {# Champs cachés : juste le widget #}
+                            {{ form_widget(field) }}
+                        {% else %}
+                            {# Champs visibles : avec label et structure complète #}
+                            <div class="form-group">
+                                {{ form_label(field, null, {'label_attr': {'class': 'custom-label'}}) }}
+                                {{ form_widget(field, {'attr': {'class': 'custom-input'}}) }}
+                                {{ form_errors(field) }}
+                            </div>
+                        {% endif %}
                     {% endif %}
                 {% endfor %}
 

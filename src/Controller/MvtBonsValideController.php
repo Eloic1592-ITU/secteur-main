@@ -23,6 +23,7 @@ final class MvtBonsValideController extends AbstractController
     }
 
     #[Route('/new', name: 'app_mvt_bons_valide_new', methods: ['GET', 'POST'])]
+
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $mvtBonsValide = new MvtBonsValide();
@@ -31,50 +32,64 @@ final class MvtBonsValideController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            //Bypasse Doctrine et on insère manuellement
             $conn = $entityManager->getConnection();
 
-            // Fonction pour formater les valeurs numériques
-            $num = fn(?string $v) => $v !== null ? number_format((float)$v, 2, '.', '') : 'NULL';
-            $int = fn(?int $v)    => $v !== null ? (int)$v : 'NULL';
-            $str = fn(?string $v) => $v !== null ? "'" . str_replace("'", "''", $v) . "'" : 'NULL';
+            // Récupérer la date des bons
+            $dBons = $form->get('D_BONS')->getData();
+            $dBonsStr = $dBons instanceof \DateTime ? $dBons->format('Y-m-d') : null;
 
-            $sql = sprintf(
-                "INSERT INTO MVT_BONS_VALIDE 
-                    (NUMMVT, D_BONS, NUMSEM, NBRSS, NBRSS0, NBRSS1, NBRSS2,
-                     MAN, MAN1, MAN2, MSM, MSM1, MSM2,
-                     MAD, MAD1, MAD2, TXPMIN, TXPMAX,
-                     TXAMIN, TXAMAX, TXMP)
-                 VALUES 
-                    (seq_MVT_BONS_VALIDE.NEXTVAL, %s, %s, %s, %s, %s, %s,
-                     %s, %s, %s, %s, %s, %s,
-                     %s, %s, %s, %s, %s,
-                     %s, %s, %s)",
-                $str($mvtBonsValide->getDBONS()),
-                $int($mvtBonsValide->getNUMSEM()),
-                $num($mvtBonsValide->getNBRSS()),
-                $num($mvtBonsValide->getNBRSS0()),
-                $num($mvtBonsValide->getNBRSS1()),
-                $num($mvtBonsValide->getNBRSS2()),
-                $num($mvtBonsValide->getMAN()),
-                $num($mvtBonsValide->getMAN1()),
-                $num($mvtBonsValide->getMAN2()),
-                $num($mvtBonsValide->getMSM()),
-                $num($mvtBonsValide->getMSM1()),
-                $num($mvtBonsValide->getMSM2()),
-                $num($mvtBonsValide->getMAD()),
-                $num($mvtBonsValide->getMAD1()),
-                $num($mvtBonsValide->getMAD2()),
-                $num($mvtBonsValide->getTXPMIN()),
-                $num($mvtBonsValide->getTXPMAX()),
-                $num($mvtBonsValide->getTXAMIN()),
-                $num($mvtBonsValide->getTXAMAX()),
-                $num($mvtBonsValide->getTXMP())
-            );
+            if (!$dBonsStr) {
+                $this->addFlash('error', 'La date des bons est obligatoire.');
+                return $this->render('mvt_bons_valide/new.html.twig', [
+                    'mvt_bons_valide' => $mvtBonsValide,
+                    'form' => $form,
+                ]);
+            }
 
-            $conn->executeStatement($sql);
+            // Mapping des champs taux → NUMSEM
+            $tauxMapping = [
+                1 => $form->get('taux_4_semaines')->getData(),
+                2 => $form->get('taux_12_semaines')->getData(),
+                3 => $form->get('taux_24_semaines')->getData(),
+                4 => $form->get('taux_26_semaines')->getData(),
+                5 => $form->get('taux_52_semaines')->getData(),
+            ];
 
-            $this->addFlash('success', 'L\'enregistrement a été créé avec succès.');
+            $insertCount = 0;
+
+            // Boucle d'insertion pour chaque taux non vide
+            foreach ($tauxMapping as $numSem => $tauxValue) {
+                // Si le champ n'est pas vide/null
+                if ($tauxValue !== null && $tauxValue !== '') {
+
+                    $txmp = number_format((float)$tauxValue, 2, '.', '');
+
+                    $sql = sprintf(
+                        "INSERT INTO MVT_BONS_VALIDE 
+                            (NUMMVT, D_BONS, NUMSEM, NBRSS, NBRSS0, NBRSS1, NBRSS2,
+                             MAN, MAN1, MAN2, MSM, MSM1, MSM2,
+                             MAD, MAD1, MAD2, TXPMIN, TXPMAX,
+                             TXAMIN, TXAMAX, TXMP)
+                         VALUES 
+                            (seq_MVT_BONS_VALIDE.NEXTVAL, '%s', %d, NULL, NULL, NULL, NULL,
+                             NULL, NULL, NULL, NULL, NULL, NULL,
+                             NULL, NULL, NULL, NULL, NULL,
+                             NULL, NULL, %s)",
+                        $dBonsStr,
+                        $numSem,
+                        $txmp
+                    );
+
+                    $conn->executeStatement($sql);
+                    $insertCount++;
+                }
+            }
+
+            if ($insertCount > 0) {
+                $this->addFlash('success', "$insertCount enregistrement(s) créé(s) avec succès.");
+            } else {
+                $this->addFlash('warning', 'Aucun taux n\'a été saisi.');
+            }
 
             return $this->redirectToRoute('app_mvt_bons_valide_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -84,6 +99,8 @@ final class MvtBonsValideController extends AbstractController
             'form' => $form,
         ]);
     }
+
+
     #[Route('/{id}', name: 'app_mvt_bons_valide_show', methods: ['GET'])]
     public function show(MvtBonsValide $mvtBonsValide): Response
     {

@@ -32,6 +32,7 @@
             {{ include('includes/sidebar.html.twig') }}
         {% endif %}
         <div class="main_container">
+            {% include 'partials/_flash_messages.html.twig' %}
             {% block body %}{% endblock %}
         </div>
     </div>

@@ -238,7 +238,7 @@
         <div class="hamburger">
         </div>
         <div class="top_menu">
-            <div class="logo">Evolution des indices des prix a la consommation</div>
+            <div class="logo"> {{ app.request.attributes.get('title') ?? 'Evolution des indices des prix a la consommation' }}</div>
             <ul>
                 <span style="color:#2e4ead; font-weight:600; margin-right:10px;">
                     {{ app.user.nom }}

@@ -339,7 +339,7 @@ final class MvtBonsValideController extends AbstractController
             $montantSoumis = $form->get('montant_soumis')->getData();
             $montantAdjuge = $form->get('montant_adjuge')->getData();
     
-            // ✅ NOUVELLE VALIDATION : Au moins UN champ doit être rempli (pas tous obligatoires)
+            // NOUVELLE VALIDATION : Au moins UN champ doit être rempli (pas tous obligatoires)
             $hasTaux = array_filter($tauxMapping, fn($v) => $v !== null && $v !== '') !== [];
             $hasOffres = ($montantAnnonce !== null && $montantAnnonce !== '') ||
                          ($montantSoumis !== null && $montantSoumis !== '') ||

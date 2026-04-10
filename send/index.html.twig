@@ -1,0 +1,162 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}MvtBonsValide index{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/tableau.css') }}">
+    <style>
+        #refreshTable {
+            transition: transform 0.3s ease;
+        }
+        #refreshTable:active {
+            transform: rotate(180deg);
+        }
+        .btn-add {
+            display: flex;
+            flex: nowrap;
+            gap: 5px;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="entete">
+
+    <!-- HEADER / FILTRE -->
+    <div class="row my-4 px-3 align-items-center justify-content-between">
+        <div class="col-md-3">
+            <label for="columnSelect" class="form-label mb-1">Choisir une colonne :</label>
+            <select id="columnSelect" class="form-select">
+                <option value="">-- Sélectionner --</option>
+                <option value="0">NUMMVT</option>
+                <option value="1">D_BONS</option>
+                <option value="2">NUMSEM</option>
+                <option value="3">NBRSS</option>
+                <option value="4">NBRSS0</option>
+                <option value="5">NBRSS1</option>
+                <option value="6">NBRSS2</option>
+                <option value="7">MAN</option>
+                <option value="8">MSM</option>
+                <option value="9">MAD</option>
+                <option value="10">TXPMIN</option>
+            </select>
+        </div>
+
+        <div class="col-md-3 d-none" id="searchColumnWrapper">
+            <label class="form-label mb-1">Rechercher :</label>
+            <input type="text" id="searchInput" class="form-control" placeholder="Entrez une valeur...">
+        </div>
+
+        <div class="col-md-2 text-end d-flex justify-content-end gap-2">
+            <a class="btn btn-outline-secondary" id="refreshTable" title="Rafraîchir">
+                <i class="bi bi-arrow-clockwise"></i>
+            </a>
+            <a class="btn btn-primary btn-add" href="{{ path('app_mvt_bons_valide_new') }}">
+                <i class="bi bi-plus-circle"></i> Ajouter
+            </a>
+        </div>
+    </div>
+    <!-- TABLE -->
+    <div class="outer-wrapper">
+    <div class="table-wrapper">
+    <table class="table table-hover" id="sortableTable">
+        <thead class="table-secondary">
+            <tr>
+                {#<th class="sortable">Num Mouvement</th>#}
+                <th class="sortable">Date Bons (D_BONS)</th>
+                <th class="sortable">Num Semaine (NUMSEM)</th>
+                <th class="sortable">Taux moyen pondéré (TXMP)</th>
+                <th class="sortable">Montant annoncé</th>
+                <th class="sortable">Montant adjugé</th>
+                <th class="sortable">Montant soumis</th>
+                {# <th class="sortable">Nombre de semaines</th> 
+                <th class="sortable">Nombre de semaines 0</th>
+                <th class="sortable">Nombre de semaines 1</th>
+                <th class="sortable">Nombre de semaines 2</th>
+                <th class="sortable">Montant annoncé 1</th>
+                <th class="sortable">Montant annoncé 2</th>
+                <th class="sortable">Montant soumis 1</th>
+                <th class="sortable">Montant soumis 2</th>
+                <th class="sortable">Montant adjugé 1</th>
+                <th class="sortable">Montant adjugé 2</th>
+                <th class="sortable">Taux proposés minimum</th>
+                <th class="sortable">Taux proposés maximum</th>
+                <th class="sortable">Taux minimum</th>
+                <th class="sortable">Taux maximum</th> #}
+                <th>ACTIONS</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for mvt in mvt_bons_valides %}
+            <tr>
+                {#<td class="modal-trigger">{{ mvt.NUMMVT }}</td>#}
+                <td class="modal-trigger">{{ mvt.DBONS }}</td>
+                <td class="modal-trigger">{{ mvt.NUMSEM }}</td>
+                <td class="modal-trigger">{{ mvt.TXMP }}</td>
+                <td class="modal-trigger">{{ mvt.MAN }}</td>
+                <td class="modal-trigger">{{ mvt.MSM1 }}</td>
+                <td class="modal-trigger">{{ mvt.MAD1 }}</td>
+                {#<td class="modal-trigger">{{ mvt.NBRSS }}</td>
+                <td class="modal-trigger">{{ mvt.NBRSS0 }}</td>
+                <td class="modal-trigger">{{ mvt.NBRSS1 }}</td>
+                <td class="modal-trigger">{{ mvt.NBRSS2 }}</td>
+                <td class="modal-trigger">{{ mvt.MAN1 }}</td>
+                <td class="modal-trigger">{{ mvt.MAN2 }}</td>
+                <td class="modal-trigger">{{ mvt.MSM }}</td>
+                <td class="modal-trigger">{{ mvt.MSM2 }}</td>
+                <td class="modal-trigger">{{ mvt.MAD }}</td>
+                <td class="modal-trigger">{{ mvt.MAD2 }}</td>
+                <td class="modal-trigger">{{ mvt.TXPMIN }}</td>
+                <td class="modal-trigger">{{ mvt.TXPMAX }}</td>
+                <td class="modal-trigger">{{ mvt.TXAMIN }}</td>
+                <td class="modal-trigger">{{ mvt.TXAMAX }}</td> #}
+
+                <td>
+                    <a href="{{ path('app_mvt_bons_valide_show', {'id': mvt.NUMMVT}) }}"
+                       class="btn btn-sm btn-outline-success" title="Voir">
+                        <i class="bi bi-eye-fill"></i>
+                    </a>
+
+                    <a href="{{ path('app_mvt_bons_valide_edit', {'id': mvt.NUMMVT}) }}"
+                       class="btn btn-sm btn-outline-primary" title="Modifier">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+
+                    <form method="post"
+                          action="{{ path('app_mvt_bons_valide_delete', {'id': mvt.NUMMVT}) }}"
+                          style="display:inline;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ mvt.NUMMVT) }}">
+                        <button type="submit" class="btn btn-sm btn-danger"> <i class="bi bi-trash"></i></button>
+                    </form>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="22">Liste vide</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    </div>
+
+</div>
+
+<div id="pagination-wrapper"></div>
+
+<script src="{{ asset('js/secteur_valide.js') }}"></script>
+
+{% block javascripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const refreshBtn = document.getElementById("refreshTable");
+
+    refreshBtn.addEventListener("click", function () {
+        location.reload();
+    });
+});
+</script>
+{% endblock %}
+
+{% endblock %}

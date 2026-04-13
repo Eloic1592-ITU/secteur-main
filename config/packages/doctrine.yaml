@@ -1,5 +1,6 @@
 doctrine:
     dbal:
+        # url: '%env(resolve:DATABASE_URL)%'
         driver: 'oci8'
         host: 'localhost'
         port: 1521

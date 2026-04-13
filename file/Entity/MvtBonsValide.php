@@ -97,18 +97,13 @@ class MvtBonsValide
         return $this->D_BONS;
     }
 
-    public function setDBONS($dBONS): self
+    public function setDBONS(string $D_BONS): static
     {
-        // Si c'est un objet DateTime, on le convertit en string
-        if ($dBONS instanceof \DateTime) {
-            $this->D_BONS = $dBONS->format('d/m/Y'); // ou 'd/m/Y' selon votre besoin
-        } else {
-            $this->D_BONS = $dBONS; // Sinon on garde la valeur telle quelle
-        }
+        $this->D_BONS = $D_BONS;
 
         return $this;
     }
-    
+
     public function getNUMSEM(): ?string
     {
         return $this->NUMSEM;

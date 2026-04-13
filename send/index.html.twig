@@ -125,8 +125,7 @@
 
                     <form method="post"
                           action="{{ path('app_mvt_bons_valide_delete', {'id': mvt.NUMMVT}) }}"
-                          style="display:inline;"                         
-                            onsubmit="return confirm('Are you sure you want to delete this item?');">
+                          style="display:inline;">
                         <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ mvt.NUMMVT) }}">
                         <button type="submit" class="btn btn-sm btn-danger"> <i class="bi bi-trash"></i></button>
                     </form>
@@ -141,11 +140,7 @@
     </table>
     </div>
     </div>
-    {% for type, messages in app.flashes %}
-        {% for message in messages %}
-            <div class="alert alert-{{ type }}">{{ message }}</div>
-        {% endfor %}
-    {% endfor %}
+
 </div>
 
 <div id="pagination-wrapper"></div>

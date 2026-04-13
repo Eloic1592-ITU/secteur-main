@@ -1,6 +1,6 @@
-
 {% block stylesheets %}
     <link rel="stylesheet" href="{{ asset('css/form.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/mvt_bon_valide_form.css') }}">
 {% endblock %}
 
 {% block body %}
@@ -20,31 +20,77 @@
                 </div>
             {% endif %}
 
-            <div class="form-grid">
+            <div class="form-container">
+                
+                {# Section D_BONS en haut #}
+                <div class="form-row-top">
+                    <div class="form-group">
+                        {{ form_label(form.D_BONS, null, {'label_attr': {'class': 'custom-label'}}) }}
+                        {{ form_widget(form.D_BONS, {'attr': {'class': 'custom-input'}}) }}
+                        {{ form_errors(form.D_BONS) }}
+                    </div>
+                </div>
 
-                {% for field in form %}
-                    {% if field.vars.name != '_token' %}
-                        <div class="form-group">
-
-                            {{ form_label(field, null, {'label_attr': {'class': 'custom-label'}}) }}
-
-                            {{ form_widget(field, {
-                                'attr': {
-                                    'class': 'custom-input'
-                                }
-                            }) }}
-
-                            {{ form_errors(field) }}
-
+                {# Section Taux Moyen Pondéré #}
+                <div class="form-section">
+                    <h3 class="section-title">Taux Moyen Pondéré</h3>
+                    
+                    <div class="taux-grid">
+                        {# Colonne gauche #}
+                        <div class="taux-column">
+                            <div class="form-group-inline">
+                                {{ form_label(form.taux_4_semaines, null, {'label_attr': {'class': 'custom-label-inline'}}) }}
+                                {{ form_widget(form.taux_4_semaines, {'attr': {'class': 'custom-input-small'}}) }}
+                            </div>
+                            <div class="form-group-inline">
+                                {{ form_label(form.taux_24_semaines, null, {'label_attr': {'class': 'custom-label-inline'}}) }}
+                                {{ form_widget(form.taux_24_semaines, {'attr': {'class': 'custom-input-small'}}) }}
+                            </div>
+                            <div class="form-group-inline">
+                                {{ form_label(form.taux_52_semaines, null, {'label_attr': {'class': 'custom-label-inline'}}) }}
+                                {{ form_widget(form.taux_52_semaines, {'attr': {'class': 'custom-input-small'}}) }}
+                            </div>
                         </div>
-                    {% endif %}
-                {% endfor %}
+
+                        {# Colonne droite #}
+                        <div class="taux-column">
+                            <div class="form-group-inline">
+                                {{ form_label(form.taux_12_semaines, null, {'label_attr': {'class': 'custom-label-inline'}}) }}
+                                {{ form_widget(form.taux_12_semaines, {'attr': {'class': 'custom-input-small'}}) }}
+                            </div>
+                            <div class="form-group-inline">
+                                {{ form_label(form.taux_26_semaines, null, {'label_attr': {'class': 'custom-label-inline'}}) }}
+                                {{ form_widget(form.taux_26_semaines, {'attr': {'class': 'custom-input-small'}}) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {# Section Offres Compétitives (pour plus tard) #}
+                <div class="form-section">
+                    <h3 class="section-title">Offres Compétitives</h3>
+                    
+                    <div class="offres-grid">
+                        <div class="form-group-inline">
+                            {{ form_label(form.montant_annonce, null, {'label_attr': {'class': 'custom-label-inline'}}) }}
+                            {{ form_widget(form.montant_annonce, {'attr': {'class': 'custom-input-small'}}) }}
+                        </div>
+                        <div class="form-group-inline">
+                            {{ form_label(form.montant_soumis, null, {'label_attr': {'class': 'custom-label-inline'}}) }}
+                            {{ form_widget(form.montant_soumis, {'attr': {'class': 'custom-input-small'}}) }}
+                        </div>
+                        <div class="form-group-inline">
+                            {{ form_label(form.montant_adjuge, null, {'label_attr': {'class': 'custom-label-inline'}}) }}
+                            {{ form_widget(form.montant_adjuge, {'attr': {'class': 'custom-input-small'}}) }}
+                        </div>
+                    </div>
+                </div>
 
             </div>
 
             <div class="form-actions">
                 <button type="submit" class="btn-primary">
-                    {{ button_label|default('Ajouter') }}
+                    {{ button_label|default('Valider') }}
                 </button>
 
                 <a href="{{ path('app_mvt_bons_valide_index') }}" class="btn-secondary">

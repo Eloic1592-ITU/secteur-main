@@ -29,35 +29,35 @@ class MvtBonsValideType extends AbstractType
                 'required' => false,
                 'mapped' => false,
                 'grouping' => true,
-                'attr' => ['placeholder' => '0.00']
+                'attr' => ['placeholder' => '0,00']
             ])
             ->add('taux_12_semaines', NumberType::class, [
                 'label' => '12 semaines (2)',
                 'required' => false,
                 'mapped' => false,
                 'grouping' => true,
-                'attr' => ['placeholder' => '0.00']
+                'attr' => ['placeholder' => '0,00']
             ])
             ->add('taux_24_semaines', NumberType::class, [
                 'label' => '24 semaines (3)',
                 'required' => false,
                 'mapped' => false,
                 'grouping' => true,
-                'attr' => ['placeholder' => '0.00']
+                'attr' => ['placeholder' => '0,00']
             ])
             ->add('taux_26_semaines', NumberType::class, [
                 'label' => '26 semaines (4)',
                 'required' => false,
                 'mapped' => false,
                 'grouping' => true,
-                'attr' => ['placeholder' => '0.00']
+                'attr' => ['placeholder' => '0,00']
             ])
             ->add('taux_52_semaines', NumberType::class, [
                 'label' => '52 semaines (5)',
                 'required' => false,
                 'mapped' => false,
                 'grouping' => true,
-                'attr' => ['placeholder' => '0.00']
+                'attr' => ['placeholder' => '0,00']
             ])
             
             // Section Offres Compétitives
@@ -66,21 +66,21 @@ class MvtBonsValideType extends AbstractType
                 'required' => false,
                 'mapped' => false,
                 'grouping' => true,
-                'attr' => ['placeholder' => '0.00']
+                'attr' => ['placeholder' => '0,00']
             ])
             ->add('montant_soumis', NumberType::class, [
                 'label' => 'Montant soumis',
                 'required' => false,
                 'mapped' => false,
                 'grouping' => true,
-                'attr' => ['placeholder' => '0.00']
+                'attr' => ['placeholder' => '0,00']
             ])
             ->add('montant_adjuge', NumberType::class, [
                 'label' => 'Montant adjugé',
                 'required' => false,
                 'mapped' => false,
                 'grouping' => true,
-                'attr' => ['placeholder' => '0.00']
+                'attr' => ['placeholder' => '0,00']
             ]);
 
         // Appliquer le transformer à tous les champs numériques

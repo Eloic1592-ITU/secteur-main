@@ -15,8 +15,9 @@
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     font-family: sans-serif;
     display: grid;
-    grid-template-columns: auto auto auto ;
+    grid-template-columns: auto auto auto;
     gap: 10px 50px;
+    margin-top: 6.25rem; /* Augmenté de 6.25rem à 8rem (128px) */
     margin-left: 17%;
 }
 

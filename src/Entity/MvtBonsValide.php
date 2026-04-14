@@ -4,9 +4,12 @@ namespace App\Entity;
 
 use App\Repository\MvtBonsValideRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: MvtBonsValideRepository::class)]
 #[ORM\Table(name: "MVT_BONS_VALIDE")]
+#[ORM\HasLifecycleCallbacks]
 class MvtBonsValide
 {
     #[ORM\Id]
@@ -74,6 +77,27 @@ class MvtBonsValide
     
     #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
     private ?string $TXMP = null;
+
+    #[ORM\OneToMany(mappedBy: 'mvtBonsValide', targetEntity: MvtBonsValideHistorique::class, cascade: ['persist', 'remove'])]
+    private Collection $historiques;
+
+    #[ORM\Column(name: "CREATED_AT", type: "string", length: 19)]
+    private ?string $createdAt = null;
+
+    #[ORM\Column(name: "UPDATED_AT", type: "string", length: 19, nullable: true)]
+    private ?string $updatedAt = null;
+
+    #[ORM\Column(name: "DELETED_AT", type: "string", length: 19, nullable: true)]
+    private ?string $deletedAt = null;
+
+    #[ORM\Column(name: "CREATED_BY", type: "string", length: 255, nullable: true)]
+    private ?string $createdBy = null;
+
+
+    public function __construct()
+    {
+        $this->historiques = new ArrayCollection();
+    }
 
     private function normalizeDecimal(?string $value): ?string
     {
@@ -318,5 +342,119 @@ class MvtBonsValide
     {
         $this->TXMP = $this->normalizeDecimal($TXMP);
         return $this;
+    }
+
+
+    public function getHistoriques(): Collection
+    {
+        return $this->historiques;
+    }
+    public function addHistorique(MvtBonsValideHistorique $historique): self
+    {
+        if (!$this->historiques->contains($historique)) {
+            $this->historiques[] = $historique;
+            $historique->setMvtBonsValide($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHistorique(MvtBonsValideHistorique $historique): self
+    {
+        if ($this->historiques->removeElement($historique)) {
+            if ($historique->getMvtBonsValide() === $this) {
+                $historique->setMvtBonsValide(null);
+            }
+        }
+    
+        return $this;
+    }
+    
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt
+            ? \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->createdAt)
+            : null;
+    }
+
+    public function setCreatedAt(\DateTimeInterface|string|null $createdAt): self
+    {
+        if ($createdAt instanceof \DateTimeInterface) {
+            $this->createdAt = $createdAt->format('Y-m-d H:i:s');
+        } else {
+            $this->createdAt = $createdAt;
+        }
+
+        return $this;
+    }
+
+    #[ORM\PreUpdate]
+    public function setUpdatedAtValue(): void
+    {
+        $this->updatedAt = (new \DateTimeImmutable('now', new \DateTimeZone('Indian/Antananarivo')))->format('Y-m-d H:i:s');
+    }
+
+    
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt
+            ? \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->updatedAt)
+            : null;
+    }
+
+    public function setUpdatedAt(\DateTimeInterface|string|null $updatedAt): self
+    {
+        if ($updatedAt instanceof \DateTimeInterface) {
+            $this->updatedAt = $updatedAt->format('Y-m-d H:i:s');
+        } else {
+            $this->updatedAt = $updatedAt;
+        }
+
+        return $this;
+    }
+
+    public function getDeletedAt(): ?\DateTimeImmutable
+    {
+        return $this->deletedAt
+            ? \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->deletedAt)
+            : null;
+    }
+
+    public function setDeletedAt(\DateTimeInterface|string|null $deletedAt): self
+    {
+        if ($deletedAt instanceof \DateTimeInterface) {
+            $this->deletedAt = $deletedAt->format('Y-m-d H:i:s');
+        } else {
+            $this->deletedAt = $deletedAt;
+        }
+    
+        return $this;
+    }
+    
+    public function getCreatedBy(): ?string
+    {
+        return $this->createdBy;
+    }
+
+    public function setCreatedBy(?string $createdBy): self
+    {
+        $this->createdBy = $createdBy;
+        return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function onPrePersist(): void
+    {
+        $now = new \DateTimeImmutable('now', new \DateTimeZone('Indian/Antananarivo'));
+
+        $this->createdAt = $now->format('Y-m-d H:i:s');
+        $this->updatedAt = $now->format('Y-m-d H:i:s');
+    }
+
+    #[ORM\PreUpdate]
+    public function onPreUpdate(): void
+    {
+        $this->updatedAt = (new \DateTimeImmutable('now', new \DateTimeZone('Indian/Antananarivo')))
+            ->format('Y-m-d H:i:s');
     }
 }

@@ -16,12 +16,12 @@ class MvtBonsValideHistorique
 
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: MvtBonsValide::class)]
+    #[ORM\ManyToOne(targetEntity: MvtBonsValide::class, inversedBy: 'historiques')]
     #[ORM\JoinColumn(name: "MVT_BONS_VALIDE_ID", referencedColumnName: "NUMMVT", nullable: false)]
     private ?MvtBonsValide $mvtBonsValide = null;
 
-    #[ORM\Column(name: "DATE_MODIFICATION", type: "datetime", nullable: false)]
-    private ?\DateTimeInterface $dateModification = null;
+    #[ORM\Column(name: "DATE_MODIFICATION",type: 'string', length: 19, nullable: true)]
+    private ?string $dateModification = null;
 
     #[ORM\Column(name: "MODIFIE_PAR", type: "string", length: 255, nullable: true)]
     private ?string $modifiePar = null;
@@ -42,17 +42,26 @@ class MvtBonsValideHistorique
         return $this;
     }
 
-    public function getDateModification(): ?\DateTimeInterface
+    public function getDateModification(): ?\DateTimeImmutable
     {
-        return $this->dateModification;
+        if ($this->dateModification === null) {
+            return null;
+        }
+    
+        $date = \DateTimeImmutable::createFromFormat('d/m/y H:i:s,u', $this->dateModification);
+    
+        return $date ?: null; // 🔥 évite le false
     }
 
-    public function setDateModification(\DateTimeInterface $dateModification): static
+    public function setDateModification(\DateTimeImmutable|string $dateModification): self
     {
-        $this->dateModification = $dateModification;
+        if ($dateModification instanceof \DateTimeImmutable) {
+            $this->dateModification = $dateModification->format('Y-m-d H:i:s');
+        } else {
+            $this->dateModification = $dateModification;
+        }
         return $this;
     }
-
     public function getModifiePar(): ?string
     {
         return $this->modifiePar;

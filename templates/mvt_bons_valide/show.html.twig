@@ -7,6 +7,7 @@
 {% endblock %}
 
 {% block body %}
+    <h2  class="info-titre"> Détails du bon du {{ mvt_bons_valide.DBONS }}</h2>
 
     <div class="info-box">
         <div class="row">
@@ -102,9 +103,34 @@
         <a href="{{ path('app_mvt_bons_valide_edit', {'id': mvt_bons_valide.NUMMVT}) }}">
             <i class="bi bi-pencil-square"></i> Modifier
         </a>
-        <a href="{{ path('app_mvt_bons_valide_delete', {'id': mvt_bons_valide.NUMMVT}) }}" data-confirm="Êtes-vous sûr de vouloir supprimer cet élément ?">
-            <i class="bi bi-trash"></i> Supprimer
-        </a>
+    </div>
+
+    </br>
+    <div class="historique">
+        <fieldset>
+            <legend>Date de création</legend>
+            <ul>
+                    Créé le :
+                    {{ mvt_bons_valide.createdAt ? mvt_bons_valide.createdAt|date('d/m/Y H:i') : 'N/A' }}
+                    par {{ mvt_bons_valide.createdBy ?? 'N/A' }}
+            </ul>
+        </fieldset>
+
+           <fieldset>
+               <legend>Historique des modifications</legend>
+               <ul>
+                   {% for historique in mvt_bons_valide.historiques %}
+                       <li>
+                           Modifié le : {{ historique.dateModification|date('d/m/Y H:i:s') }}
+                           {% if historique.modifiePar %}
+                               par {{ historique.modifiePar }}
+                           {% endif %}
+                       </li>
+                   {% else %}
+                       <li>Aucune modification enregistrée</li>
+                   {% endfor %}
+               </ul>
+           </fieldset>
     </div>
 
 {% endblock %}

@@ -77,13 +77,11 @@ final class MvtBonsValideController extends AbstractController
                          ($montantSoumis !== null && $montantSoumis !== '') &&
                          ($montantAdjuge !== null && $montantAdjuge !== '');
     
+                         
             // Validation : les deux sections doivent être remplies
             if (!$hasTaux || !$hasOffres) {
-                $this->addFlash('error', 'Veuillez remplir les deux sections (Taux Moyen Pondéré ET Offres Compétitives).');
-                return $this->render('mvt_bons_valide/new.html.twig', [
-                    'mvt_bons_valide' => $mvtBonsValide,
-                    'form' => $form,
-                ]);
+                $this->addFlash('danger', 'Veuillez remplir tous les champs des deux sections (Taux ET Offres).');
+                return $this->redirectToRoute('app_mvt_bons_valide_new');
             }
     
             // Démarrer une transaction
@@ -240,205 +238,235 @@ final class MvtBonsValideController extends AbstractController
     public function edit(Request $request, MvtBonsValide $mvtBonsValide, EntityManagerInterface $entityManager): Response
     {
         $conn = $entityManager->getConnection();
-
-        // ================== DONNÉES DE BASE ==================
+    
+        // ================== DONNÉES ==================
         $nummvt = $mvtBonsValide->getNUMMVT();
         $dBonsCurrent = $mvtBonsValide->getDBONS();
-
-        // Utilisateur actuelle
-        // Récupérer l'utilisateur connecté
-        /** @var \App\Entity\User $currentUser */
-        $currentUser = $this->getUser();
-        $userIdentifier = $currentUser ? $currentUser->getNom() : 'Système';
-
-
+    
         $currentDate = (new \DateTime('now', new \DateTimeZone('Indian/Antananarivo')))
             ->format('Y-m-d H:i:s');
-
-        // ================== RÉCUPÉRER DONNÉES ==================
+    
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+        $userIdentifier = $user ? $user->getNom() : 'Système';
+    
+        // ================== SELECT ==================
         $sql = sprintf(
-            "SELECT NUMSEM, TXMP, MAN, MAN1, MAN2, MSM1, MAD1, CREATED_AT, CREATED_BY
-             FROM MVT_BONS_VALIDE
+            "SELECT NUMSEM, TXMP, MAN, MAN1, MAN2, MSM1, MAD1 
+             FROM MVT_BONS_VALIDE 
              WHERE D_BONS = TO_DATE('%s', 'DD/MM/YY')
              ORDER BY NUMSEM",
             $dBonsCurrent
         );
+        // ================== META (CREATED_AT / CREATED_BY) ==================
+        $sqlMeta = sprintf(
+            "SELECT CREATED_AT, CREATED_BY 
+             FROM MVT_BONS_VALIDE
+             WHERE D_BONS = TO_DATE('%s','DD/MM/YY')
+             FETCH FIRST 1 ROWS ONLY",
+            $dBonsCurrent
+        );
 
+        $meta = $conn->fetchAssociative($sqlMeta);
+
+        // ⚠️ Sécurité : fallback si jamais null
+        $createdAtOriginal = $currentDate;
+
+        if (!empty($meta['CREATED_AT'])) {
+            $date = \DateTime::createFromFormat('d/m/y H:i:s', substr($meta['CREATED_AT'], 0, 17));
+
+            if ($date !== false) {
+                $createdAtOriginal = $date->format('Y-m-d H:i:s');
+            }
+        }
+
+        $createdByOriginal = $meta['CREATED_BY'] ?? $userIdentifier;
+    
         $records = $conn->fetchAllAssociative($sql);
-
-        // 🔥 FIX IMPORTANT : éviter ton bug historique
-        $createdAtOriginal = $records[0]['CREATED_AT'] ?? $currentDate;
-        $createdByOriginal = $records[0]['CREATED_BY'] ?? 'Système';
-
+    
         $currentData = [];
         foreach ($records as $record) {
             $currentData[$record['NUMSEM']] = $record;
         }
-
+    
         $form = $this->createForm(MvtBonsValideType::class, $mvtBonsValide);
         $transformer = new CommaToPointTransformer();
-
+    
         // ================== PRE-FILL ==================
         if ($request->getMethod() === 'GET') {
-
+    
             $dateObject = null;
             if ($dBonsCurrent) {
                 $dateObject = \DateTime::createFromFormat('d/m/y', $dBonsCurrent)
                     ?: \DateTime::createFromFormat('Y-m-d', $dBonsCurrent);
             }
-
+    
             $form->get('D_BONS')->setData($dateObject);
-
-            foreach ([1,2,3,4,5] as $i) {
-                $fieldMap = [
-                    1 => 'taux_4_semaines',
-                    2 => 'taux_12_semaines',
-                    3 => 'taux_24_semaines',
-                    4 => 'taux_26_semaines',
-                    5 => 'taux_52_semaines',
-                ];
-
-                if (isset($currentData[$i]['TXMP'])) {
-                    $form->get($fieldMap[$i])->setData(
-                        $transformer->toFloat($currentData[$i]['TXMP'])
-                    );
-                }
+    
+            if (isset($currentData[1]['TXMP'])) {
+                $form->get('taux_4_semaines')->setData($transformer->toFloat($currentData[1]['TXMP']));
             }
-
+            if (isset($currentData[2]['TXMP'])) {
+                $form->get('taux_12_semaines')->setData($transformer->toFloat($currentData[2]['TXMP']));
+            }
+            if (isset($currentData[3]['TXMP'])) {
+                $form->get('taux_24_semaines')->setData($transformer->toFloat($currentData[3]['TXMP']));
+            }
+            if (isset($currentData[4]['TXMP'])) {
+                $form->get('taux_26_semaines')->setData($transformer->toFloat($currentData[4]['TXMP']));
+            }
+            if (isset($currentData[5]['TXMP'])) {
+                $form->get('taux_52_semaines')->setData($transformer->toFloat($currentData[5]['TXMP']));
+            }
+    
             if (isset($currentData[6])) {
                 $form->get('montant_annonce')->setData($transformer->toFloat($currentData[6]['MAN'] ?? 0));
                 $form->get('montant_soumis')->setData($transformer->toFloat($currentData[6]['MSM1'] ?? 0));
                 $form->get('montant_adjuge')->setData($transformer->toFloat($currentData[6]['MAD1'] ?? 0));
             }
         }
-
+    
         $form->handleRequest($request);
-
+    
         if ($form->isSubmitted() && $form->isValid()) {
-
-            $dBons = $form->get('D_BONS')->getData();
-            $dBonsStr = $dBons instanceof \DateTime ? $dBons->format('d/m/y') : null;
-
-            if (!$dBonsStr) {
-                $this->addFlash('error', 'Date obligatoire');
-                return $this->render('mvt_bons_valide/edit.html.twig', [
-                    'form' => $form,
-                ]);
-            }
-
-            // ================== DELETE ==================
-            $conn->executeStatement(sprintf(
-                "DELETE FROM BONS_VALIDE WHERE DDONS = TO_DATE('%s','DD/MM/YY')",
-                $dBonsCurrent
-            ));
-
-            $conn->executeStatement(sprintf(
-                "DELETE FROM MVT_BONS_VALIDE WHERE D_BONS = TO_DATE('%s','DD/MM/YY')",
-                $dBonsCurrent
-            ));
-
-            // ================== INSERT BONS ==================
-            $conn->executeStatement(sprintf(
-                "INSERT INTO BONS_VALIDE (DDONS)
-                 VALUES (TO_DATE('%s','DD/MM/YY'))",
-                $dBonsStr
-            ));
-
-            $tauxMapping = [
-                1 => $form->get('taux_4_semaines')->getData(),
-                2 => $form->get('taux_12_semaines')->getData(),
-                3 => $form->get('taux_24_semaines')->getData(),
-                4 => $form->get('taux_26_semaines')->getData(),
-                5 => $form->get('taux_52_semaines')->getData(),
-            ];
-
-            $updatedIds = [];
-
-            // ================== INSERT TAUX ==================
-            foreach ($tauxMapping as $numSem => $tauxValue) {
-
-                if ($tauxValue !== null && $tauxValue !== '') {
-
-                    $txmp = number_format((float)$tauxValue, 2, '.', '');
-
+    
+            $conn->beginTransaction();
+    
+            try {
+    
+                $dBons = $form->get('D_BONS')->getData();
+                $dBonsStr = $dBons instanceof \DateTime ? $dBons->format('d/m/y') : null;
+    
+                if (!$dBonsStr) {
+                    throw new \Exception("Date invalide");
+                }
+    
+                // ================== DELETE ==================
+                $conn->executeStatement(sprintf(
+                    "DELETE FROM BONS_VALIDE WHERE DDONS = TO_DATE('%s','DD/MM/YY')",
+                    $dBonsCurrent
+                ));
+    
+                $conn->executeStatement(sprintf(
+                    "DELETE FROM MVT_BONS_VALIDE WHERE D_BONS = TO_DATE('%s','DD/MM/YY')",
+                    $dBonsCurrent
+                ));
+    
+                // ================== INSERT BONS ==================
+                $conn->executeStatement(sprintf(
+                    "INSERT INTO BONS_VALIDE (DDONS)
+                     VALUES (TO_DATE('%s','DD/MM/YY'))",
+                    $dBonsStr
+                ));
+    
+                // ================== TAUX ==================
+                $tauxMapping = [
+                    1 => $form->get('taux_4_semaines')->getData(),
+                    2 => $form->get('taux_12_semaines')->getData(),
+                    3 => $form->get('taux_24_semaines')->getData(),
+                    4 => $form->get('taux_26_semaines')->getData(),
+                    5 => $form->get('taux_52_semaines')->getData(),
+                ];
+    
+                $updatedIds = [];
+    
+                foreach ($tauxMapping as $numSem => $tauxValue) {
+    
+                    if ($tauxValue !== null && $tauxValue !== '') {
+    
+                        $txmp = number_format((float)$tauxValue, 2, '.', '');
+    
+                        $conn->executeStatement(sprintf(
+                            "INSERT INTO MVT_BONS_VALIDE
+                            (NUMMVT, D_BONS, NUMSEM, TXMP, CREATED_AT, UPDATED_AT, CREATED_BY)
+                            VALUES
+                            (seq_MVT_BONS_VALIDE.NEXTVAL,
+                             TO_DATE('%s','DD/MM/YY'),
+                             %d,
+                             %s,
+                             TO_TIMESTAMP('%s','YYYY-MM-DD HH24:MI:SS'),
+                             TO_TIMESTAMP('%s','YYYY-MM-DD HH24:MI:SS'),
+                             '%s')",
+                            $dBonsStr,
+                            $numSem,
+                            $txmp,
+                            $createdAtOriginal,
+                            $currentDate,
+                            str_replace("'", "''", $createdByOriginal)
+                        ));
+    
+                        $updatedIds[] = $conn->fetchOne("SELECT seq_MVT_BONS_VALIDE.CURRVAL FROM DUAL");
+                    }
+                }
+    
+                // ================== OFFRES ==================
+                if ($form->get('montant_annonce')->getData() ||
+                    $form->get('montant_soumis')->getData() ||
+                    $form->get('montant_adjuge')->getData()) {
+    
+                    $man = number_format((float)$form->get('montant_annonce')->getData(), 2, '.', '');
+                    $msm1 = number_format((float)$form->get('montant_soumis')->getData(), 2, '.', '');
+                    $mad1 = number_format((float)$form->get('montant_adjuge')->getData(), 2, '.', '');
+    
                     $conn->executeStatement(sprintf(
                         "INSERT INTO MVT_BONS_VALIDE
-                        (NUMMVT, D_BONS, NUMSEM, TXMP, CREATED_AT, UPDATED_AT, CREATED_BY)
-                        VALUES
+                        (NUMMVT, D_BONS, NUMSEM, MAN, MSM1, MAD1,
+                         CREATED_AT, UPDATED_AT, CREATED_BY)
+                         VALUES
                         (seq_MVT_BONS_VALIDE.NEXTVAL,
                          TO_DATE('%s','DD/MM/YY'),
-                         %d,
-                         %s,
+                         6,
+                         %s, %s, %s,
                          TO_TIMESTAMP('%s','YYYY-MM-DD HH24:MI:SS'),
                          TO_TIMESTAMP('%s','YYYY-MM-DD HH24:MI:SS'),
                          '%s')",
                         $dBonsStr,
-                        $numSem,
-                        $txmp,
+                        $man,
+                        $msm1,
+                        $mad1,
                         $createdAtOriginal,
                         $currentDate,
                         str_replace("'", "''", $createdByOriginal)
                     ));
-
+    
                     $updatedIds[] = $conn->fetchOne("SELECT seq_MVT_BONS_VALIDE.CURRVAL FROM DUAL");
                 }
+    
+                // ================== HISTORIQUE ==================
+                foreach ($updatedIds as $id) {
+    
+                    $conn->executeStatement(sprintf(
+                        "INSERT INTO MVT_BONS_VALIDE_HISTORIQUE
+                        (ID, MVT_BONS_VALIDE_ID, DATE_MODIFICATION, MODIFIE_PAR)
+                        VALUES
+                        (seq_MVT_BONS_VALIDE_HISTORIQUE.NEXTVAL,
+                         %d,
+                         TO_TIMESTAMP('%s','YYYY-MM-DD HH24:MI:SS'),
+                         '%s')",
+                        $id,
+                        $currentDate,
+                        str_replace("'", "''", $userIdentifier)
+                    ));
+                }
+    
+                $conn->commit();
+    
+                $this->addFlash('success', 'Modification réussie');
+    
+                return $this->redirectToRoute('app_mvt_bons_valide_index');
+    
+            } catch (\Exception $e) {
+    
+                $conn->rollBack();
+    
+                $this->addFlash('error', 'Erreur : ' . $e->getMessage());
+    
+                return $this->render('mvt_bons_valide/edit.html.twig', [
+                    'form' => $form,
+                ]);
             }
-
-            // ================== OFFRES ==================
-            if ($form->get('montant_annonce')->getData() ||
-                $form->get('montant_soumis')->getData() ||
-                $form->get('montant_adjuge')->getData()) {
-
-                $man = number_format((float)$form->get('montant_annonce')->getData(), 2, '.', '');
-                $msm1 = number_format((float)$form->get('montant_soumis')->getData(), 2, '.', '');
-                $mad1 = number_format((float)$form->get('montant_adjuge')->getData(), 2, '.', '');
-
-                $conn->executeStatement(sprintf(
-                    "INSERT INTO MVT_BONS_VALIDE
-                    (NUMMVT, D_BONS, NUMSEM, MAN, MSM1, MAD1,
-                     CREATED_AT, UPDATED_AT, CREATED_BY)
-                     VALUES
-                    (seq_MVT_BONS_VALIDE.NEXTVAL,
-                     TO_DATE('%s','DD/MM/YY'),
-                     6,
-                     %s, %s, %s,
-                     TO_TIMESTAMP('%s','YYYY-MM-DD HH24:MI:SS'),
-                     TO_TIMESTAMP('%s','YYYY-MM-DD HH24:MI:SS'),
-                     '%s')",
-                    $dBonsStr,
-                    $man,
-                    $msm1,
-                    $mad1,
-                    $createdAtOriginal,
-                    $currentDate,
-                    str_replace("'", "''", $createdByOriginal)
-                ));
-
-                $updatedIds[] = $conn->fetchOne("SELECT seq_MVT_BONS_VALIDE.CURRVAL FROM DUAL");
-            }
-
-            // ================== HISTORIQUE (FIX IMPORTANT) ==================
-            foreach ($updatedIds as $id) {
-
-                $conn->executeStatement(sprintf(
-                    "INSERT INTO MVT_BONS_VALIDE_HISTORIQUE
-                    (ID, MVT_BONS_VALIDE_ID, DATE_MODIFICATION, MODIFIE_PAR)
-                    VALUES
-                    (seq_MVT_BONS_VALIDE_HISTORIQUE.NEXTVAL,
-                     %d,
-                     TO_TIMESTAMP('%s','YYYY-MM-DD HH24:MI:SS'),
-                     '%s')",
-                    $id,
-                    $currentDate,
-                    str_replace("'", "''", $userIdentifier)
-                ));
-            }
-
-            $this->addFlash('success', 'Modification réussie');
-
-            return $this->redirectToRoute('app_mvt_bons_valide_index');
         }
-
+    
         return $this->render('mvt_bons_valide/edit.html.twig', [
             'form' => $form,
         ]);

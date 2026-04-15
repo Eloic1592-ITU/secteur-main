@@ -21,7 +21,6 @@
             {% endif %}
 
             <div class="form-container">
-                
                 {# Section D_BONS en haut #}
                 <div class="form-row-top">
                     <div class="form-group">
@@ -30,7 +29,13 @@
                         {{ form_errors(form.D_BONS) }}
                     </div>
                 </div>
-
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ label }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endfor %}
                 {# Section Taux Moyen Pondéré #}
                 <div class="form-section">
                     <h3 class="section-title">Taux Moyen Pondéré</h3>

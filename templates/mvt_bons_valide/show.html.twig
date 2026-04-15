@@ -121,7 +121,7 @@
                <ul>
                    {% for historique in mvt_bons_valide.historiques %}
                        <li>
-                           Modifié le : {{ historique.dateModification|date('d/m/Y H:i:s') }}
+                           Modifié le : {{ historique.dateModification|date('d/m/Y H:i') }}
                            {% if historique.modifiePar %}
                                par {{ historique.modifiePar }}
                            {% endif %}

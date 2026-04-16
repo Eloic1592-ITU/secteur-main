@@ -1,0 +1,231 @@
+/* ===== GLOBAL ===== */
+.entete {
+    padding: 20px;
+    margin-left: 15%;
+    background: #ffffff;
+}
+
+/* ===== FILTRE ===== */
+.filter-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.filter-left {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+}
+
+.filter-right {
+    display: flex;
+    gap: 10px;
+}
+
+.custom-input {
+    padding: 8px 12px;
+    border-radius: 5px;
+}
+
+.custom-input-small {
+    width: auto; /* au lieu de 100% */
+}
+
+/* ===== CARTE PRINCIPALE ===== */
+.custom-container {
+    display: flex;
+    justify-content: center;
+}
+
+.custom-card {
+    width: 100%;
+    max-width: 900px;
+    border-radius: 10px;
+    border: 2px solid #ccc;
+    background: #e9ecef;
+    padding: 20px;
+}
+
+.custom-card-body {
+    padding: 10px;
+}
+
+.section-title {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+/* ===== SECTION ===== */
+.form-section {
+    border: 2px solid #444;
+    border-radius: 8px;
+    padding: 20px;
+    background: #f8f9fa;
+    margin-bottom: 20px;
+}
+
+/* ===== GRID TAUX ===== */
+.taux-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.taux-column {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* ===== LABEL + VALUE ===== */
+.form-group-inline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.custom-label-inline {
+    font-weight: 500;
+    color: #333;
+}
+
+.custom-value {
+    background: #fff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    min-width: 100px;
+    text-align: right;
+}
+
+/* ===== ACTIONS ===== */
+.form-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+/* ===== BOUTONS ===== */
+.btn-primary {
+    background-color: #28a745;
+    border: none;
+    padding: 8px 15px;
+    color: white;
+    border-radius: 5px;
+}
+
+.btn-primary:hover {
+    background-color: #218838;
+}
+
+.btn-outline-primary {
+    border: 1px solid #007bff;
+    color: #007bff;
+}
+
+.btn-outline-success {
+    border: 1px solid #28a745;
+    color: #28a745;
+}
+
+.btn-outline-danger {
+    border: 1px solid #dc3545;
+    color: #dc3545;
+}
+
+.btn-outline-secondary {
+    border: 1px solid #6c757d;
+    color: #6c757d;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .entete {
+        margin-left: 0;
+    }
+
+    .taux-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-bar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* ===== BOUTONS ACTION ===== */
+.form-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.btn-action {
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s ease;
+}
+
+/* ===== BOUTONS ACTION ===== */
+.form-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.btn-action {
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s ease;
+}
+
+/* Voir */
+.btn-view {
+    background: #28a745;
+    color: white;
+}
+.btn-view:hover {
+    background: #218838;
+}
+
+/* Modifier */
+.btn-edit {
+    background: #007bff;
+    color: white;
+}
+.btn-edit:hover {
+    background: #0069d9;
+}
+
+/* Supprimer */
+.btn-delete {
+    background: #dc3545;
+    color: white;
+}
+.btn-delete:hover {
+    background: #c82333;
+}

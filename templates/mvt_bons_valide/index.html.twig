@@ -3,149 +3,178 @@
 {% block title %}MvtBonsValide index{% endblock %}
 
 {% block stylesheets %}
-    <link rel="stylesheet" href="{{ asset('css/tableau.css') }}">
-    <style>
-        #refreshTable {
-            transition: transform 0.3s ease;
-        }
-        #refreshTable:active {
-            transform: rotate(180deg);
-        }
-        .btn-add {
-            display: flex;
-            flex: nowrap;
-            gap: 5px;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/mvt_bon_valide_list.css') }}">    
 {% endblock %}
 
 {% block body %}
-<div class="entete">
+    <div class="entete">
 
-    <!-- HEADER / FILTRE -->
-    <div class="row my-4 px-3 align-items-center justify-content-between">
-        <div class="col-md-3">
-            <label for="columnSelect" class="form-label mb-1">Choisir une colonne :</label>
-            <select id="columnSelect" class="form-select">
-                <option value="">-- Sélectionner --</option>
-                <option value="0">NUMMVT</option>
-                <option value="1">D_BONS</option>
-                <option value="2">NUMSEM</option>
-                <option value="3">NBRSS</option>
-                <option value="4">NBRSS0</option>
-                <option value="5">NBRSS1</option>
-                <option value="6">NBRSS2</option>
-                <option value="7">MAN</option>
-                <option value="8">MSM</option>
-                <option value="9">MAD</option>
-                <option value="10">TXPMIN</option>
-            </select>
+        <!-- HEADER / FILTRE -->
+        <form method="get" action="{{ path('app_mvt_bons_valide_index') }}" 
+              class="row my-4 px-3 align-items-end">
+
+            <!-- Date -->
+            <div class="col-md-3">
+                <label class="form-label">Date des bons :</label>
+                <input type="date" name="date_filter" class="form-control"
+                       value="{{ app.request.get('date_filter') }}">
+            </div>
+
+            <!-- Bouton afficher -->
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i> Afficher
+                </button>
+            </div>
+
+            <!-- Boutons droite -->
+            <div class="col-md-7 d-flex justify-content-end gap-2">
+
+                <a class="btn btn-outline-secondary" id="refreshTable" title="Rafraîchir">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </a>
+
+                <a class="btn btn-primary btn-add" href="{{ path('app_mvt_bons_valide_new') }}">
+                    <i class="bi bi-plus-circle"></i> Ajouter
+                </a>
+
+            </div>
+
+        </form>
+        <!-- CONTAINER -->
+        <div class="custom-container">
+        
+            {% for mvt in mvt_bons_valides %}
+        
+            <div class="custom-card mb-4">
+                <div class="custom-card-body">
+                
+                    <h4 class="text-center mb-4">
+                        Mouvement du {{ mvt.D_BONS }}
+                    </h4>
+                
+                    <div class="form-container">
+                    
+                        {# ================= DATE ================= #}
+                        <div class="form-row-top">
+                            <div class="form-group">
+                                <label class="custom-label">Date des Bons</label>
+                                <div class="custom-input">
+                                    <span class="custom-input-small"><strong>{{ mvt.D_BONS }}</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                    
+                        {# ================= TAUX ================= #}
+                        <div class="form-section">
+                            <h3 class="section-title">Taux Moyen Pondéré</h3>
+                        
+                            <div class="taux-grid">
+                            
+                                <div class="taux-column">
+                                    <div class="form-group-inline">
+                                        <span class="custom-label-inline">4 semaines :</span>
+                                        <span class="custom-input-small"><strong>{{ mvt.taux[1] ?? '-' }}</strong></span>
+                                    </div>
+                                
+                                    <div class="form-group-inline">
+                                        <span class="custom-label-inline">24 semaines :</span>
+                                        <span class="custom-input-small"><strong>{{ mvt.taux[3] ?? '-' }}</strong></span>
+                                    </div>
+                                
+                                    <div class="form-group-inline">
+                                        <span class="custom-label-inline">52 semaines :</span>
+                                        <span class="custom-input-small"><strong>{{ mvt.taux[5] ?? '-' }}</strong></span>
+                                    </div>
+                                </div>
+                            
+                                <div class="taux-column">
+                                    <div class="form-group-inline">
+                                        <span class="custom-label-inline">12 semaines :</span>
+                                        <span class="custom-input-small"><strong>{{ mvt.taux[2] ?? '-' }}</strong></span>
+                                    </div>
+                                
+                                    <div class="form-group-inline">
+                                        <span class="custom-label-inline">26 semaines :</span>
+                                        <span class="custom-input-small"><strong>{{ mvt.taux[4] ?? '-' }}</strong></span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        </div>
+                    
+                        {# ================= OFFRES ================= #}
+                        <div class="form-section">
+                            <h3 class="section-title">Offres Compétitives</h3>
+                        
+                            <div class="offres-grid">
+                            
+                                <div class="form-group-inline">
+                                    <span class="custom-label-inline">Montant annoncé :</span>
+                                    <span class="custom-input-small"><strong>{{ mvt.MAN ?? '-' }}</strong></span>
+
+                                </div>
+                            
+                                <div class="form-group-inline">
+                                    <span class="custom-label-inline">Montant soumis :</span>
+                                    <span class="custom-input-small"><strong>{{ mvt.MSM1 ?? '-' }}</strong></span>
+                                </div>
+                            
+                                <div class="form-group-inline">
+                                    <span class="custom-label-inline">Montant adjugé :</span>
+                                    <span class="custom-input-small"><strong>{{ mvt.MAD1 ?? '-' }}</strong></span>
+                                </div>
+                            
+                            </div>
+                        </div>
+                    
+                    </div>
+                
+                    {# ================= ACTIONS ================= #}
+                    <div class="form-actions">
+                    
+                        <a href="{{ path('app_mvt_bons_valide_show', {'id': mvt.id}) }}"
+                           class="btn-action btn-view">
+                            <i class="bi bi-eye-fill"></i> Voir détails
+                        </a>
+                    
+                        <a href="{{ path('app_mvt_bons_valide_edit', {'id': mvt.id}) }}"
+                           class="btn-action btn-edit">
+                            <i class="bi bi-pencil"></i> Modifier
+                        </a>
+                    
+                        <form method="post"
+                              action="{{ path('app_mvt_bons_valide_delete', {'id': mvt.id}) }}"
+                              onsubmit="return confirm('Confirmer la suppression ?');"
+                              style="display:inline;">
+                    
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ mvt.D_BONS) }}">
+                    
+                            <button type="submit" class="btn-action btn-delete">
+                                <i class="bi bi-trash"></i> Supprimer
+                            </button>
+                        
+                        </form>
+                    
+                    </div>
+                
+                </div>
+            </div>
+        
+            {% else %}
+                <div class="alert alert-info text-center">
+                    Aucune donnée disponible
+                </div>
+            {% endfor %}
+            
         </div>
-
-        <div class="col-md-3 d-none" id="searchColumnWrapper">
-            <label class="form-label mb-1">Rechercher :</label>
-            <input type="text" id="searchInput" class="form-control" placeholder="Entrez une valeur...">
-        </div>
-
-        <div class="col-md-2 text-end d-flex justify-content-end gap-2">
-            <a class="btn btn-outline-secondary" id="refreshTable" title="Rafraîchir">
-                <i class="bi bi-arrow-clockwise"></i>
-            </a>
-            <a class="btn btn-primary btn-add" href="{{ path('app_mvt_bons_valide_new') }}">
-                <i class="bi bi-plus-circle"></i> Ajouter
-            </a>
-        </div>
-    </div>
-    <!-- TABLE -->
-    <div class="outer-wrapper">
-    <div class="table-wrapper">
-    <table class="table table-hover" id="sortableTable">
-        <thead class="table-secondary">
-            <tr>
-                {#<th class="sortable">Num Mouvement</th>#}
-                <th class="sortable">Date Bons (D_BONS)</th>
-                <th class="sortable">Num Semaine (NUMSEM)</th>
-                <th class="sortable">Taux moyen pondéré (TXMP)</th>
-                <th class="sortable">Montant annoncé</th>
-                <th class="sortable">Montant adjugé</th>
-                <th class="sortable">Montant soumis</th>
-                {# <th class="sortable">Nombre de semaines</th> 
-                <th class="sortable">Nombre de semaines 0</th>
-                <th class="sortable">Nombre de semaines 1</th>
-                <th class="sortable">Nombre de semaines 2</th>
-                <th class="sortable">Montant annoncé 1</th>
-                <th class="sortable">Montant annoncé 2</th>
-                <th class="sortable">Montant soumis 1</th>
-                <th class="sortable">Montant soumis 2</th>
-                <th class="sortable">Montant adjugé 1</th>
-                <th class="sortable">Montant adjugé 2</th>
-                <th class="sortable">Taux proposés minimum</th>
-                <th class="sortable">Taux proposés maximum</th>
-                <th class="sortable">Taux minimum</th>
-                <th class="sortable">Taux maximum</th> #}
-                <th>ACTIONS</th>
-            </tr>
-        </thead>
-
-        <tbody>
-        {% for mvt in mvt_bons_valides %}
-            <tr>
-                {#<td class="modal-trigger">{{ mvt.NUMMVT }}</td>#}
-                <td class="modal-trigger">{{ mvt.DBONS }}</td>
-                <td class="modal-trigger">{{ mvt.NUMSEM }}</td>
-                <td class="modal-trigger">{{ mvt.TXMP }}</td>
-                <td class="modal-trigger">{{ mvt.MAN }}</td>
-                <td class="modal-trigger">{{ mvt.MSM1 }}</td>
-                <td class="modal-trigger">{{ mvt.MAD1 }}</td>
-                {#<td class="modal-trigger">{{ mvt.NBRSS }}</td>
-                <td class="modal-trigger">{{ mvt.NBRSS0 }}</td>
-                <td class="modal-trigger">{{ mvt.NBRSS1 }}</td>
-                <td class="modal-trigger">{{ mvt.NBRSS2 }}</td>
-                <td class="modal-trigger">{{ mvt.MAN1 }}</td>
-                <td class="modal-trigger">{{ mvt.MAN2 }}</td>
-                <td class="modal-trigger">{{ mvt.MSM }}</td>
-                <td class="modal-trigger">{{ mvt.MSM2 }}</td>
-                <td class="modal-trigger">{{ mvt.MAD }}</td>
-                <td class="modal-trigger">{{ mvt.MAD2 }}</td>
-                <td class="modal-trigger">{{ mvt.TXPMIN }}</td>
-                <td class="modal-trigger">{{ mvt.TXPMAX }}</td>
-                <td class="modal-trigger">{{ mvt.TXAMIN }}</td>
-                <td class="modal-trigger">{{ mvt.TXAMAX }}</td> #}
-
-                <td>
-                    <a href="{{ path('app_mvt_bons_valide_show', {'id': mvt.NUMMVT}) }}"
-                       class="btn btn-sm btn-outline-success" title="Voir">
-                        <i class="bi bi-eye-fill"></i>
-                    </a>
-
-                    <a href="{{ path('app_mvt_bons_valide_edit', {'id': mvt.NUMMVT}) }}"
-                       class="btn btn-sm btn-outline-primary" title="Modifier">
-                        <i class="bi bi-pencil"></i>
-                    </a>
-                    <form method="post"
-                          action="{{ path('app_mvt_bons_valide_delete', {'id': mvt.NUMMVT}) }}"
-                          style="display:inline;"                         
-                            onsubmit="return confirm('Are you sure you want to delete this item?');">
-                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ mvt.NUMMVT) }}">
-                        <button type="submit" class="btn btn-sm btn-danger"> <i class="bi bi-trash"></i></button>
-                    </form>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="22">Liste vide</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    </div>
-    </div>
     {% for type, messages in app.flashes %}
         {% for message in messages %}
             <div class="alert alert-{{ type }}">{{ message }}</div>
         {% endfor %}
     {% endfor %}
-</div>
+    </div>
+
 
 <div id="pagination-wrapper"></div>
 

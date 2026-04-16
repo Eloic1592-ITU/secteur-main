@@ -1,136 +1,138 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}MvtBonsValide{% endblock %}
+{% block title %}Détails MvtBonsValide{% endblock %}
 
 {% block stylesheets %}
-    <link rel="stylesheet" href="{{ asset('css/view.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/mvt_bon_valide_show.css') }}">
 {% endblock %}
 
 {% block body %}
-    <h2  class="info-titre"> Détails du bon du {{ mvt_bons_valide.DBONS }}</h2>
+<br>
+<h2 class="page-title">
+    Consultation du mouvement : {{ mvt_bons_valide.DBONS }}
+</h2>
+<div class="show-container">
 
-    <div class="info-box">
-        <div class="row">
-            <span class="label">NUMMVT</span>
-            <span class="value">{{ mvt_bons_valide.NUMMVT }}</span>
+    {# ===== LEFT CONTENT ===== #}
+        <div class="main-content">
+        
+        {% for mvt in mvt_bons_valides %}
+                
+        <div class="show-card">
+        
+            <h3 class="title">
+                Détails du bon du {{ mvt.D_BONS }}
+            </h3>
+        
+            <div class="info-grid">
+            
+                <div class="info-row">
+                    <span class="label">Date BONS</span>
+                    <span class="value">{{ mvt.D_BONS }}</span>
+                </div>
+            
+                <div class="info-row">
+                    <span class="label">Montant Annoncés</span>
+                    <span class="value">{{ mvt.MAN }}</span>
+                </div>
+            
+                <div class="info-row">
+                    <span class="label">Montant Soumis</span>
+                    <span class="value">{{ mvt.MSM1 }}</span>
+                </div>
+            
+                <div class="info-row">
+                    <span class="label">Montant Adjugés</span>
+                    <span class="value">{{ mvt.MAD1 }}</span>
+                </div>
+            
+                <div class="info-row">
+                    <span class="label">4 semaines :</span>
+                    <span class="value">{{ mvt.taux[1] ?? '-' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">26 semaines :</span>
+                    <span class="value">{{ mvt.taux[3] ?? '-' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">52 semaines :</span>
+                    <span class="value">{{ mvt.taux[5] ?? '-' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">12 semaines :</span>
+                    <span class="value">{{ mvt.taux[2] ?? '-' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">26 semaines :</span>
+                    <span class="value">{{ mvt.taux[4] ?? '-' }}</span>
+                </div>
+            
+            </div>
+        
         </div>
-        <div class="row">
-            <span class="label">D_BONS</span>
-            <span class="value">{{ mvt_bons_valide.DBONS }}</span>
-        </div>
-        <div class="row">
-            <span class="label">NUMSEM</span>
-            <span class="value">{{ mvt_bons_valide.NUMSEM }}</span>
-        </div>
-        <div class="row">
-            <span class="label">NBRSS</span>
-            <span class="value">{{ mvt_bons_valide.NBRSS }}</span>
-        </div>
-        <div class="row">
-            <span class="label">NBRSS0</span>
-            <span class="value">{{ mvt_bons_valide.NBRSS0 }}</span>
-        </div>
-        <div class="row">
-            <span class="label">NBRSS1</span>
-            <span class="value">{{ mvt_bons_valide.NBRSS1 }}</span>
-        </div>
-        <div class="row">
-            <span class="label">NBRSS2</span>
-            <span class="value">{{ mvt_bons_valide.NBRSS2 }}</span>
-        </div>
-        <div class="row">
-            <span class="label">MAN</span>
-            <span class="value">{{ mvt_bons_valide.MAN }}</span>
-        </div>
-        <div class="row">
-            <span class="label">MAN1</span>
-            <span class="value">{{ mvt_bons_valide.MAN1 }}</span>
-        </div>
-        <div class="row">
-            <span class="label">MAN2</span>
-            <span class="value">{{ mvt_bons_valide.MAN2 }}</span>
-        </div>
-        <div class="row">
-            <span class="label">MSM</span>
-            <span class="value">{{ mvt_bons_valide.MSM }}</span>
-        </div>
-        <div class="row">
-            <span class="label">MSM1</span>
-            <span class="value">{{ mvt_bons_valide.MSM1 }}</span>
-        </div>
-        <div class="row">
-            <span class="label">MSM2</span>
-            <span class="value">{{ mvt_bons_valide.MSM2 }}</span>
-        </div>
-        <div class="row">
-            <span class="label">MAD</span>
-            <span class="value">{{ mvt_bons_valide.MAD }}</span>
-        </div>
-        <div class="row">
-            <span class="label">MAD1</span>
-            <span class="value">{{ mvt_bons_valide.MAD1 }}</span>
-        </div>
-        <div class="row">
-            <span class="label">MAD2</span>
-            <span class="value">{{ mvt_bons_valide.MAD2 }}</span>
-        </div>
-        <div class="row">
-            <span class="label">TXPMIN</span>
-            <span class="value">{{ mvt_bons_valide.TXPMIN }}</span>
-        </div>
-        <div class="row">
-            <span class="label">TXPMAX</span>
-            <span class="value">{{ mvt_bons_valide.TXPMAX }}</span>
-        </div>
-        <div class="row">
-            <span class="label">TXAMIN</span>
-            <span class="value">{{ mvt_bons_valide.TXAMIN }}</span>
-        </div>
-        <div class="row">
-            <span class="label">TXAMAX</span>
-            <span class="value">{{ mvt_bons_valide.TXAMAX }}</span>
-        </div>
-        <div class="row">
-            <span class="label">Taux Moyen Pondéré (TXMP)</span>
-            <span class="value">{{ mvt_bons_valide.TXMP }}</span>
-        </div>
-    </div>
+        <div class="actions">
+            <a href="{{ path('app_mvt_bons_valide_index') }}" class="btn btn-back">
+                <i class="bi bi-arrow-left"></i> Retour
+            </a>
 
-    <div class="actions">
-        <a href="{{ path('app_mvt_bons_valide_index') }}">
-            <i class="bi bi-arrow-return-left"></i> Retour à la liste
-        </a>
-        <a href="{{ path('app_mvt_bons_valide_edit', {'id': mvt_bons_valide.NUMMVT}) }}">
-            <i class="bi bi-pencil-square"></i> Modifier
-        </a>
-    </div>
+            <a href="{{ path('app_mvt_bons_valide_edit', {'id': mvt_bons_valide.NUMMVT}) }}"
+               class="btn btn-edit">
+                 <i class="bi bi-pencil"></i> Modifier
+            </a>
+        </div>
+        {% endfor %}
+        
+        </div>
+    
 
-    </br>
-    <div class="historique">
-        <fieldset>
-            <legend>Date de création</legend>
-            <ul>
-                    Créé le :
+    {# ===== RIGHT SIDEBAR HISTORIQUE ===== #}
+    <div class="sidebar">
+
+        <div class="history-card">
+
+            <h4>Historique</h4>
+
+            <div class="history-section">
+
+                <div class="history-item creation">
+                    <strong>Création</strong><br>
                     {{ mvt_bons_valide.createdAt ? mvt_bons_valide.createdAt|date('d/m/Y H:i') : 'N/A' }}
-                    par {{ mvt_bons_valide.createdBy ?? 'N/A' }}
-            </ul>
-        </fieldset>
+                    <br>
+                    <small>Auteur: <strong>{{ mvt_bons_valide.createdBy ?? 'N/A' }}</strong></small>
+                </div>
 
-           <fieldset>
-               <legend>Historique des modifications</legend>
-               <ul>
-                   {% for historique in mvt_bons_valide.historiques %}
-                       <li>
-                           Modifié le : {{ historique.dateModification|date('d/m/Y H:i') }}
-                           {% if historique.modifiePar %}
-                               par {{ historique.modifiePar }}
-                           {% endif %}
-                       </li>
-                   {% else %}
-                       <li>Aucune modification enregistrée</li>
-                   {% endfor %}
-               </ul>
-           </fieldset>
+                <hr>
+
+                {% for mvt in mvt_bons_valides %}
+
+                    {% for historique in mvt.historiques %}
+
+                        <div class="history-item update">
+                            <strong>Modification</strong><br>
+                        
+                            {{ historique.DATE_MODIFICATION
+                                ? historique.DATE_MODIFICATION
+                                : 'N/A' }}
+                            
+                            <br>
+                            
+                            <small>Auteur: <strong>{{ historique.MODIFIE_PAR ?? '' }}</strong></small>
+                        </div>
+                    
+                    {% else %}
+                    
+                        <p class="empty">Aucune modification</p>
+                    
+                    {% endfor %}
+                    
+                {% endfor %}
+
+            </div>
+
+        </div>
+
     </div>
+
+</div>
 
 {% endblock %}

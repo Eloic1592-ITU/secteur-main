@@ -1,0 +1,135 @@
+/* Page titre */
+
+.page-title {
+    margin-left: 15%;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #333;
+}
+/* ===== CONTAINER GLOBAL ===== */
+.show-container {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    margin-left: 15%;
+}
+
+/* ===== LEFT ===== */
+.main-content {
+    flex: 3;
+}
+
+.show-card {
+    background: #e9ecef;
+    border-radius: 10px;
+    padding: 20px;
+    border: 2px solid #ccc;
+}
+
+.title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+/* ===== INFO GRID ===== */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+.label {
+    font-weight: 600;
+    color: #333;
+}
+
+.value {
+    font-weight: bold;
+}
+
+/* ===== ACTIONS ===== */
+.actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 8px 14px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.btn-back {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-edit {
+    background: #007bff;
+    color: white;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+    flex: 1;
+}
+
+.history-card {
+    background: #ffffff;
+    border-radius: 10px;
+    border: 2px solid #ccc;
+    padding: 15px;
+    position: sticky;
+    top: 20px;
+}
+
+.history-card h4 {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.history-item {
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    background: #f8f9fa;
+}
+
+.history-item.creation {
+    border-left: 4px solid #28a745;
+}
+
+.history-item.update {
+    border-left: 4px solid #007bff;
+}
+
+.empty {
+    text-align: center;
+    color: #777;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .show-container {
+        flex-direction: column;
+        margin-left: 0;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -50,7 +50,7 @@ class MvtBonsValideHistorique
     
         $date = \DateTimeImmutable::createFromFormat('d/m/y H:i:s,u', $this->dateModification);
     
-        return $date ?: null; // 🔥 évite le false
+        return $date ?: null; // évite le false
     }
 
     public function setDateModification(\DateTimeImmutable|string $dateModification): self

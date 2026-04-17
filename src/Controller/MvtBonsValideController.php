@@ -23,53 +23,58 @@ final class MvtBonsValideController extends AbstractController
     
         $dateFilter = $request->query->get('date_filter');
     
-    if ($dateFilter) {
-
-        $date = \DateTime::createFromFormat('Y-m-d', $dateFilter);
-        $dateFormatted = $date ? $date->format('d/m/y') : null;
-
-        $sql = sprintf(
-            "SELECT * FROM MVT_BONS_VALIDE 
-             WHERE D_BONS ='%s'
-             ORDER BY NUMSEM",
-            $dateFormatted
-        );
-
-        $rows = $conn->fetchAllAssociative($sql);
-
-        // REGROUPEMENT
-        $grouped = [];
-
-        foreach ($rows as $row) {
-
-            $dateKey = $row['D_BONS'];
-
-            if (!isset($grouped[$dateKey])) {
-                $grouped[$dateKey] = [
-                    'D_BONS' => $row['D_BONS'],
-                    'taux' => [],
-                    'MAN' => null,
-                    'MSM1' => null,
-                    'MAD1' => null,
-                    'id' => $row['NUMMVT']
-                ];
+        if ($dateFilter) {
+        
+            // Détection du format
+            if (strpos($dateFilter, '/') !== false) {
+                // format: 17/04/26
+                $date = \DateTime::createFromFormat('d/m/y', $dateFilter);
+            } else {
+                // format: 2026-04-17
+                $date = \DateTime::createFromFormat('Y-m-d', $dateFilter);
             }
-
-            // TAUX (NUMSEM 1 à 5)
-            if ($row['NUMSEM'] >= 1 && $row['NUMSEM'] <= 5) {
-                $grouped[$dateKey]['taux'][$row['NUMSEM']] = $row['TXMP'];
+        
+            $dateFormatted = $date ? $date->format('d/m/y') : null;
+        
+            $sql = sprintf(
+                "SELECT * FROM MVT_BONS_VALIDE 
+                 WHERE D_BONS ='%s'
+                 ORDER BY NUMSEM",
+                $dateFormatted
+            );
+        
+            $rows = $conn->fetchAllAssociative($sql);
+        
+            // REGROUPEMENT
+            $grouped = [];
+        
+            foreach ($rows as $row) {
+        
+                $dateKey = $row['D_BONS'];
+        
+                if (!isset($grouped[$dateKey])) {
+                    $grouped[$dateKey] = [
+                        'D_BONS' => $row['D_BONS'],
+                        'taux' => [],
+                        'MAN' => null,
+                        'MSM1' => null,
+                        'MAD1' => null,
+                        'id' => $row['NUMMVT']
+                    ];
+                }
+        
+                if ($row['NUMSEM'] >= 1 && $row['NUMSEM'] <= 5) {
+                    $grouped[$dateKey]['taux'][$row['NUMSEM']] = $row['TXMP'];
+                }
+        
+                if ($row['NUMSEM'] == 6) {
+                    $grouped[$dateKey]['MAN'] = $row['MAN'];
+                    $grouped[$dateKey]['MSM1'] = $row['MSM1'];
+                    $grouped[$dateKey]['MAD1'] = $row['MAD1'];
+                }
             }
-
-            // OFFRES (NUMSEM = 6)
-            if ($row['NUMSEM'] == 6) {
-                $grouped[$dateKey]['MAN'] = $row['MAN'];
-                $grouped[$dateKey]['MSM1'] = $row['MSM1'];
-                $grouped[$dateKey]['MAD1'] = $row['MAD1'];
-            }
-        }
-
-        // IMPORTANT → reset index pour Twig
-        $mvt_bons_valides = array_values($grouped);  
+        
+            $mvt_bons_valides = array_values($grouped);
         } else {
             $mvt_bons_valides = [];
         }
@@ -89,6 +94,7 @@ final class MvtBonsValideController extends AbstractController
     
         if ($form->isSubmitted() && $form->isValid()) {
     
+        
             $conn = $entityManager->getConnection();
 
             // Récupérer l'utilisateur connecté
@@ -110,6 +116,8 @@ final class MvtBonsValideController extends AbstractController
                     'form' => $form,
                 ]);
             }
+
+            // dd($dBonsStr);
     
             // Mapping des champs taux → NUMSEM
             $tauxMapping = [
@@ -168,7 +176,7 @@ final class MvtBonsValideController extends AbstractController
                                  TXAMIN, TXAMAX, TXMP,
                                 CREATED_AT, UPDATED_AT, CREATED_BY)
                             VALUES 
-                                (seq_MVT_BONS_VALIDE.NEXTVAL, TO_DATE('%s', 'DD/MM/YY'), %d, NULL, NULL, NULL, NULL,
+                                (seq_MVT_BONS_VALIDE.NEXTVAL,(TO_DATE('%s', 'DD/MM/YY')), %d, NULL, NULL, NULL, NULL,
                                 NULL, NULL, NULL, NULL, NULL, NULL,
                                 NULL, NULL, NULL, NULL, NULL,
                                 NULL, NULL, %s,
@@ -209,7 +217,7 @@ final class MvtBonsValideController extends AbstractController
                             TXAMIN, TXAMAX, TXMP,
                             CREATED_AT, UPDATED_AT, CREATED_BY)
                         VALUES 
-                            (seq_MVT_BONS_VALIDE.NEXTVAL, TO_DATE('%s', 'DD/MM/YY'), 6, NULL, NULL, NULL, NULL,
+                            (seq_MVT_BONS_VALIDE.NEXTVAL,(TO_DATE('%s', 'DD/MM/YY')), 6, NULL, NULL, NULL, NULL,
                             %s, %s, %s, NULL, %s, NULL,
                             NULL, %s, NULL, NULL, NULL,
                             NULL, NULL, NULL,
@@ -255,11 +263,12 @@ final class MvtBonsValideController extends AbstractController
                 //         $conn->executeStatement($sqlHistorique);
                 //     }
                 // }
-    
+                // dd($form->getData());
                 // Valider la transaction
                 $conn->commit();
     
                 $this->addFlash('success', "$insertCount enregistrement(s) créé(s) avec succès dans MVT_BONS_VALIDE et historique.");
+                return $this->redirectToRoute('app_mvt_bons_valide_index');
     
             } catch (\Exception $e) {
                 // Annuler la transaction en cas d'erreur
@@ -288,6 +297,7 @@ final class MvtBonsValideController extends AbstractController
         $conn = $entityManager->getConnection();
 
         $dateKey = $mvtBonsValide->getDBONS();
+        // dd($mvtBonsValide->getCreatedAt());
  
         $dateFilter = $dateKey ? $dateKey : null;
 
@@ -306,13 +316,13 @@ final class MvtBonsValideController extends AbstractController
             );
 
             $rows = $conn->fetchAllAssociative($sql);
-            // dd($rows);
+
 
             // =========================
             // 2. HISTORIQUES
             // =========================
             $sqlHist = "
-                SELECT h.*
+                SELECT h.ID,MVT_BONS_VALIDE_ID, TO_CHAR(h.DATE_MODIFICATION, 'DD/MM/YYYY HH24:MI') as DATE_MODIFICATION,MODIFIE_PAR
                 FROM MVT_BONS_VALIDE_HISTORIQUE h
                 INNER JOIN MVT_BONS_VALIDE m ON m.NUMMVT = h.MVT_BONS_VALIDE_ID
                 WHERE m.D_BONS = :dateFilter
@@ -417,7 +427,7 @@ final class MvtBonsValideController extends AbstractController
         $sql = sprintf(
             "SELECT NUMMVT, NUMSEM, TXMP, MAN, MSM1, MAD1 
             FROM MVT_BONS_VALIDE 
-            WHERE D_BONS = TO_DATE('%s', 'DD/MM/YY')
+            WHERE D_BONS ='%s'
             ORDER BY NUMSEM",
             $dBonsCurrent
         );
@@ -519,6 +529,9 @@ final class MvtBonsValideController extends AbstractController
                 // ================== DETECTION MODIFICATIONS ==================
                 $modifiedIds = [];
 
+                // Vérifier si la date a changé
+                $dateChanged = ($dBonsStr !== $dBonsCurrent);
+
                 // UPDATE OU INSERT DES TAUX
                 foreach ($newTaux as $numSem => $value) {
 
@@ -532,18 +545,21 @@ final class MvtBonsValideController extends AbstractController
 
                             $nummvtExistant = $currentData[$numSem]['NUMMVT'];
 
-                            // UPDATE si modification
-                            if ((float)$value !== (float)$old) {
+                            // UPDATE si modification (date OU valeur)
+                            if ($dateChanged || (float)$value !== (float)$old) {
 
-                                $conn->executeStatement(sprintf(
+                                $req=$conn->executeStatement(sprintf(
                                     "UPDATE MVT_BONS_VALIDE
-                                    SET TXMP = %s,
+                                    SET D_BONS = TO_DATE('%s','DD/MM/YY'),
+                                        TXMP = %s,
                                         UPDATED_AT = TO_TIMESTAMP('%s','YYYY-MM-DD HH24:MI:SS')
                                     WHERE NUMMVT = %d",
+                                    $dBonsStr,
                                     $txmp,
                                     $currentDate,
                                     $nummvtExistant
                                 ));
+                                // dd($req);
 
                                 $modifiedIds[] = $nummvtExistant;
                             }
@@ -556,7 +572,7 @@ final class MvtBonsValideController extends AbstractController
                                 (NUMMVT, D_BONS, NUMSEM, TXMP, CREATED_AT, UPDATED_AT, CREATED_BY)
                                 VALUES
                                 (seq_MVT_BONS_VALIDE.NEXTVAL,
-                                '%s',
+                                TO_DATE('%s','DD/MM/YY'),
                                 %d,
                                 %s,
                                 TO_TIMESTAMP('%s','YYYY-MM-DD HH24:MI:SS'),
@@ -575,7 +591,8 @@ final class MvtBonsValideController extends AbstractController
                                 "SELECT NUMMVT FROM MVT_BONS_VALIDE
                                 WHERE D_BONS = TO_DATE('%s','DD/MM/YY')
                                 AND NUMSEM = %d
-                                ORDER BY NUMMVT DESC FETCH FIRST 1 ROWS ONLY",
+                                AND ROWNUM =1
+                                ORDER BY NUMMVT DESC",
                                 $dBonsStr,
                                 $numSem
                             ));
@@ -594,6 +611,7 @@ final class MvtBonsValideController extends AbstractController
 
                         // Vérifier si modifié
                         $isModified = (
+                            $dateChanged ||
                             (float)$newOffres['MAN'] !== (float)$currentData[6]['MAN'] ||
                             (float)$newOffres['MSM1'] !== (float)$currentData[6]['MSM1'] ||
                             (float)$newOffres['MAD1'] !== (float)$currentData[6]['MAD1']
@@ -605,11 +623,13 @@ final class MvtBonsValideController extends AbstractController
 
                             $conn->executeStatement(sprintf(
                                 "UPDATE MVT_BONS_VALIDE
-                                SET MAN = %s,
+                                SET D_BONS = TO_DATE('%s','DD/MM/YY'),
+                                    MAN = %s,
                                     MSM1 = %s,
                                     MAD1 = %s,
                                     UPDATED_AT = TO_TIMESTAMP('%s','YYYY-MM-DD HH24:MI:SS')
                                 WHERE NUMMVT = %d",
+                                $dBonsStr,
                                 number_format((float)$newOffres['MAN'], 2, '.', ''),
                                 number_format((float)$newOffres['MSM1'], 2, '.', ''),
                                 number_format((float)$newOffres['MAD1'], 2, '.', ''),
@@ -629,7 +649,7 @@ final class MvtBonsValideController extends AbstractController
                             CREATED_AT, UPDATED_AT, CREATED_BY)
                             VALUES
                             (seq_MVT_BONS_VALIDE.NEXTVAL,
-                            '%s',
+                            TO_DATE('%s','DD/MM/YY'),
                             6,
                             %s, %s, %s,
                             TO_TIMESTAMP('%s','YYYY-MM-DD HH24:MI:SS'),
@@ -646,9 +666,10 @@ final class MvtBonsValideController extends AbstractController
 
                         $newId = $conn->fetchOne(sprintf(
                             "SELECT NUMMVT FROM MVT_BONS_VALIDE
-                            WHERE D_BONS = '%s'
-                            AND NUMSEM = 6
-                            ORDER BY NUMMVT DESC FETCH FIRST 1 ROWS ONLY",
+                            WHERE D_BONS = TO_DATE('%s','DD/MM/YY')
+                            AND NUMSEM = 6 
+                            AND ROWNUM =1
+                            ORDER BY NUMMVT DESC ",
                             $dBonsStr
                         ));
 
@@ -718,7 +739,7 @@ final class MvtBonsValideController extends AbstractController
             ]);
 
         }
-
+        $this->addFlash('danger', 'Mouvement supprimée');
         return $this->redirectToRoute('app_mvt_bons_valide_index');
     }
 }

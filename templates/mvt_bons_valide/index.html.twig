@@ -165,14 +165,13 @@
                 <div class="alert alert-info text-center">
                     Aucune donnée disponible
                 </div>
+            {% endfor %}           
+            {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ type }}">{{ message }}</div>
             {% endfor %}
-            
-        </div>
-    {% for type, messages in app.flashes %}
-        {% for message in messages %}
-            <div class="alert alert-{{ type }}">{{ message }}</div>
         {% endfor %}
-    {% endfor %}
+        </div>
     </div>
 
 
